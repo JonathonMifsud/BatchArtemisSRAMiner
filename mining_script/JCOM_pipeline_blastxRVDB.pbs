@@ -1,0 +1,49 @@
+#!/bin/bash
+# JM
+# script to blastx RVDB and extract positive virus contigs
+
+#PBS -P RDS-FSC-jcomvirome-RW
+#PBS -N blastx_RVDB_array
+#PBS -l select=1:ncpus=12:mem=60GB
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
+
+##load modules
+module load blast
+module load diamond/2.0.9
+
+# blastx
+function BlastxRVDB {
+    diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$db" -t "$tempdir" -o "$outpath"/"$library_id"_RVDB_blastx_results.txt -e 1E-10 -c1 -k 5 -b "$MEM" -p "$CPU" -f 6 qseqid qlen sseqid stitle pident length evalue --ultra-sensitive
+}
+
+#tool to extract contigs from trinity assembly Blast to fasta
+function blastToFasta {
+    grep -i ".*" "$outpath"/"$library_id"_RVDB_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_RVDB_blastcontigs.fasta
+    sed -i 's/--//' "$outpath"/"$library_id"_RVDB_blastcontigs.fasta # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_RVDB_blastcontigs.fasta # remove the white space
+    sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_RVDB_blastcontigs.fasta # annotate the contigs
+    rm "$outpath"/"$library_id""_temp_contig_names.txt"
+}
+
+# read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
+readarray -t myarray < "$file_of_accessions"
+export library_run=${myarray["$PBS_ARRAY_INDEX"]}
+library_run_without_path="$(basename -- $library_run)"
+library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
+
+# variables change these to whatever you like!
+wd=/project/"$root_project"/"$project"/blast_results
+inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
+outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
+tempdir=/scratch/"$root_project"/
+CPU=12
+MEM=1       
+db=/scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd
+
+# cd working dir
+cd "$wd" || exit
+
+BlastxRVDB
+blastToFasta

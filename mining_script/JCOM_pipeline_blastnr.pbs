@@ -1,0 +1,43 @@
+#!/bin/bash
+# JM
+# script to blastx nr and extract positive virus contigs
+
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
+
+##load modules
+module load blast+
+module load diamond
+
+# blastx
+function BlastxNR {
+    diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$nr_db" -o "$outpath"/"$library_id"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
+}
+
+#tool to extract contigs from trinity assembly Blast to fasta
+function blastToFasta {
+    grep -i ".*" "$outpath"/"$library_id"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_nr_blastcontigs.fasta
+    sed -i 's/--//' "$outpath"/"$library_id"_nr_blastcontigs.fasta # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_nr_blastcontigs.fasta # remove the white space
+    sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_nr_blastcontigs.fasta # annotate the contigs
+    rm "$outpath"/"$library_id""_temp_contig_names.txt"
+}
+
+# read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
+readarray -t myarray < "$file_of_accessions"
+export library_run=${myarray["$PBS_ARRAY_INDEX"]}
+library_run_without_path="$(basename -- $library_run)"
+library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
+
+# variables change these to whatever you like!
+wd=/project/"$root_project"/"$project"/blast_results
+inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
+outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
+nr_db=/scratch/VELAB/Databases/Blast/nr.Mar-2023.dmnd
+
+# cd working dir
+cd "$wd" || exit
+
+BlastxNR
+blastToFasta
