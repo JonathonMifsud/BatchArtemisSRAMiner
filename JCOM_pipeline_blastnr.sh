@@ -1,7 +1,18 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
-# shell wrapper script to run download SRA libs
-# provide a file containing SRA accessions - make sure it is full path to file -f 
+# This script will run blastx on .contigs.fa files from the final_contigs folder
+# It will then extract the contigs that have a blast hit to the nr database
+
+# I tend to run this once per project on a single file containing all the contigs concatenated together resulting from the Rdrp and RVDB blasts (i.e. the blastcontig.fa files in blast_results/)
+
+# You will need to provide the following arguments:
 
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
@@ -47,6 +58,7 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
     
     if [ "$file_of_accessions" = "" ]
         then
+            # if no file of accessions is provided then run all files in the final_contigs directory
             echo "No file containing files to run specified running all files in /project/$root_project/$project/contigs/final_contigs/"
             ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa > /project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_blastxNR
             export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_blastxNR"
@@ -123,6 +135,7 @@ if [ "$jPhrase" == "0-0" ]; then
     export jPhrase="0-1"
 fi
 
+# Run the blastx jobs
 qsub -J $jPhrase \
     -o "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$(date '+%Y%m%d')_stout.txt" \
     -e "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$(date '+%Y%m%d')_stderr.txt" \

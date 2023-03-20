@@ -1,4 +1,11 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
 # Setup script to create a project folder and subfolders to run the batch pipeline
 

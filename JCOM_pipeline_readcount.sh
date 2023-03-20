@@ -1,4 +1,11 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
 # shell wrapper script to run read count getter for project folder
 # if you are providing files include both the left and right file

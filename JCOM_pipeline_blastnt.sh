@@ -1,6 +1,17 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
-# shell wrapper script to run download SRA libs
+# This script will run blastn on .contigs.fa files from the final_contigs folder
+# It will then extract the contigs that have a blast hit to the nr database
+
+# I tend to run this once per project on a single file containing all the contigs concatenated together resulting from the Rdrp and RVDB blasts (i.e. the blastcontig.fa files in blast_results/)
+
 # provide a file containing SRA accessions - make sure it is full path to file -f 
 
 while getopts "p:f:q:r:" 'OPTKEY'; do

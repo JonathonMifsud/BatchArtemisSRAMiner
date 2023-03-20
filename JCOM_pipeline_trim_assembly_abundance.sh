@@ -1,6 +1,16 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
-# shell wrapper script to run download SRA libs
+# This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
+
+# you can specify the accessions to look for using -f 
+# or if you don't specify -f it will run will all of the .fastq.gz files in your raw_reads folder
 # provide a file containing SRA accessions - make sure it is full path to file -f 
 
 while getopts "p:f:q:r:" 'OPTKEY'; do
@@ -35,7 +45,7 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p cichlid_virome"
+            echo "No project string entered. Use -p JCOM_pipeline_virome"
     exit 1
     fi
 
@@ -44,30 +54,33 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             echo "No root project string entered. Use -r VELAB or -r jcomvirome"
     exit 1
     fi
-
+    
     if [ "$file_of_accessions" = "" ]
         then
-            echo "No file containing SRA to run specified"
-        else    
+            echo "No file containing files to run specified running all files in /scratch/$root_project/$project/raw_reads/"
+            ls -d /scratch/"$root_project"/"$project"/raw_reads/*.fastq.gz > /scratch/"$root_project"/"$project"/raw_reads/file_of_accessions_for_assembly
+            export file_of_accessions="/scratch/$root_project/$project/raw_reads/file_of_accessions_for_assembly"
+        else
+        # just include the sra or lib id in this file as path is already specficied    
             export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
     fi
-
+     
      # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
     if [ "$queue" = "defaultQ" ]
         then 
-            job_time="walltime=12:00:00"
+            job_time="walltime=84:00:00"
             queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
     fi
 
       if [ "$queue" = "scavenger" ]
         then 
-            job_time="walltime=12:00:00"
+            job_time="walltime=48:00:00"
             queue_project="$root_project"
     fi
 
           if [ "$queue" = "alloc-eh" ]
         then 
-            job_time="walltime=12:00:00"
+            job_time="walltime=500:00:00"
             queue_project="VELAB"
     fi
 
@@ -82,10 +95,10 @@ if [ "$jPhrase" == "0-0" ]; then
 fi
 
 qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/sra_download_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/sra_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+    -o "/project/$root_project/$project/logs/trim_assemble_abundance_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/trim_assemble_abundance_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
     -l "$job_time" \
-    -P "RDS-FSC-$queue_project-RW" \
-    /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_sra.pbs
+    -P "$queue_project" \
+    /project/"$root_project"/"$project"/scripts/JCOM_pipeline_trim_assembly_abundance.pbs

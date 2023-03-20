@@ -1,6 +1,17 @@
 #!/bin/bash
-# JMIFSUD 2022
-# script to trim and assemble using trimmmomatic and megahit
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
+
+# Underlying pbs script that is run using the wrapper script YOURPROJECT_trim_assembly_abundance.sh
+# This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
+
+# you can specify the accessions to look for using -f 
+# or if you don't specify -f it will run will all of the .fastq.gz files in your raw_reads folder
 
 #PBS -N TrimMegaAbun
 #PBS -l select=1:ncpus=12:mem=120GB

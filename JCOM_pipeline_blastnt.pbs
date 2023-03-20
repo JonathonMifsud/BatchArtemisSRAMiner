@@ -1,7 +1,17 @@
 #!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
-# JM
-# script to blastx RdRp and extract positive virus contigs
+# Underlying pbs script that is run using the wrapper script YOURPROJECT_blastnt.sh
+# This script will run blastn on the contigs.fa file from the assembled contigs
+# It will then extract the contigs that have a blast hit to the nr database
+
+# I tend to run this once per project on a single file containing all the contigs concatenated together resulting from the Rdrp and RVDB blasts (i.e. the blastcontig.fa files in blast_results/)
 
 #PBS -N blastn_blastxNT_array
 #PBS -M jmif9945@uni.sydney.edu.au
@@ -14,7 +24,7 @@ function Blastn {
     blastn -query "$inpath"/"$library_id".contigs.fa -db "$nt_db" -out "$outpath"/"$library_id"_nt_blastn_results.txt -max_target_seqs 10 -num_threads 22 -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
 }
 
-#tool to extract contigs from  assembly Blast to fasta
+#tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
     grep -i ".*" "$outpath"/"$library_id"_nt_blastn_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
 	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_nt_blastcontigs.fasta

@@ -1,5 +1,19 @@
 #!/bin/bash
-# SRA downloader 
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
+
+# Underlying pbs script that is run using the wrapper script YOURPROJECT_download_sra.sh
+# given a file of SRA accessions (runs), this script will download the SRA files
+# it will cycle through several download methods until it finds one that works
+# it will check to see if the library is paired or single and if it has downloaded correctly
+
+# once the script is completed I would recommend using check_sra_downloads.sh to do a final check that everything has downloaded correctly
+# this will output a file of accessions that have not downloaded correctly
 
 #PBS -N ascp_SRA_download
 #PBS -M jmif9945@uni.sydney.edu.au

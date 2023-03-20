@@ -1,6 +1,17 @@
 #!/bin/bash
-# JM
-# script to blastx RVDB and extract positive virus contigs
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
+
+# Underlying pbs script that is run using the wrapper script YOURPROJECT_blastxRVDB.sh
+# This script will run blastx on eacj contigs.fa file against the RVDB database
+# the RVDB is a viral database that contains DNA and RNA viruses
+# it is useful for picking up non-rdrp segements / contigs and DNA viruses
+# It will then extract the contigs that have a blast hit to the RVDB database which can be used in later steps such as Blastx against the NR and NT databases.    
 
 #PBS -P RDS-FSC-jcomvirome-RW
 #PBS -N blastx_RVDB_array

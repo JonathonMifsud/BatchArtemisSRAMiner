@@ -1,9 +1,17 @@
 #!/bin/bash
-# JM
-# script to blastx nr and extract positive virus contigs
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
 
-#PBS -M jmif9945@uni.sydney.edu.au
-#PBS -m abe
+# Underlying pbs script that is run using the wrapper script YOURPROJECT_blastnr.sh
+# This script will run blastx on the contigs.fa file from the assembled contigs
+# It will then extract the contigs that have a blast hit to the nr database
+
+# I tend to run this once per project on a single file containing all the contigs concatenated together resulting from the Rdrp and RVDB blasts (i.e. the blastcontig.fa files in blast_results/)
 
 ##load modules
 module load blast+
@@ -14,7 +22,7 @@ function BlastxNR {
     diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$nr_db" -o "$outpath"/"$library_id"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
 }
 
-#tool to extract contigs from trinity assembly Blast to fasta
+#tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
     grep -i ".*" "$outpath"/"$library_id"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
 	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_nr_blastcontigs.fasta
@@ -30,10 +38,12 @@ export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 
-# variables change these to whatever you like!
+# paths 
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
+
+# database
 nr_db=/scratch/VELAB/Databases/Blast/nr.Mar-2023.dmnd
 
 # cd working dir

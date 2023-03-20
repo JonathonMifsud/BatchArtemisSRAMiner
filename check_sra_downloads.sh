@@ -1,6 +1,12 @@
 #!/bin/bash
-# Jonathon Mifsud
-# 06/03/2023
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+#                                                                                                             #
+#                                 please ask before sharing these scripts :)                                  #
+###############################################################################################################
+
 # A function to check if the dir contains all of the sras specified in the file_of_accessions
 # This is useful for checking if the download was successful
 # It also looks to see if both paired end files are present for each SRA
