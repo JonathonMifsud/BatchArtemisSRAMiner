@@ -42,3 +42,5 @@ find . -type f | while read FILE
 do
     mv $FILE $(echo $FILE | sed "s/JCOM_pipeline/$project/g")
 done
+
+find . -type f -name '*' -exec sed -i "s/JCOM_pipeline/$project/g" {} \;
