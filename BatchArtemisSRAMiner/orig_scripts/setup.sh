@@ -35,11 +35,10 @@ mkdir /scratch/"$root"/"$project"/read_count
 mkdir /scratch/"$root"/"$project"/raw_reads
 mkdir /scratch/"$root"/"$project"/trimmed_reads
 
-cd orig_scripts
 mv ./* /project/"$root"/"$project"/scripts
-cd ./* /project/"$root"/"$project"/scripts
+cd /project/"$root"/"$project"/scripts
 
 find . -type f | while read FILE
 do
-    mv $FILE $(echo $FILE | sed 's/JCOM_pipeline/"$project"/g')
+    mv $FILE $(echo $FILE | sed "s/JCOM_pipeline/$project/g")
 done
