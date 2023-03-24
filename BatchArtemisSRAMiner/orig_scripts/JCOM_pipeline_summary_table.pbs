@@ -1,0 +1,187 @@
+#!/bin/bash
+# Script to take all of the blast ouput and construct a summary table
+
+########## PBS SCRIPT FOR SUMMARY TABLE ##########
+#PBS -N summary_table
+#PBS -l select=1:ncpus=8:mem=120GB
+#PBS -M jmif9945@uni.sydney.edu.au
+
+## Blast output contigs shoudl already be annotated with library ID
+
+function condaSetUp(){
+    CONDA_BASE=$(conda info --base) #figure out the path to conda directory so I can source it
+    source $CONDA_BASE/etc/profile.d/conda.sh
+    conda activate project_pipeline
+}
+
+function createSummaryTable(){
+    mkdir -p "$wd"/blast_results/summary_table_creation/
+
+    ## Take output of final abundance calculate standarised abundance and add library name to the contig name and join all together
+    echo "Number of Abundance files loaded: " $(ls "$abundance"/*_RSEM.isoforms.results | wc -l)
+    for i in $(ls "$abundance"/*_RSEM.isoforms.results); do
+        id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RSEM.isoforms.results"); print a[1]}')
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$abundance"/"$id"_anno_RSEM.isoforms.results
+    done
+
+    ## Join all the abundance files together and place in /scratch/$root_project/"$project"/blast_results/summary_table_creation/
+    cat "$abundance"/*_anno_RSEM.isoforms.results > /project/$root_project/"$project"/blast_results/summary_table_creation/combined_abundance_table.txt
+    rm "$abundance"/*_anno_RSEM.isoforms.results
+
+
+    ## Do the same for the RdRp blast results for each library
+    echo "Number of RdRp Blast files loaded: " $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt | wc -l)
+    for i in $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt); do
+        id=$(echo "$i" | xargs basename | awk '{split($0,a,"_rdrp_blastx_results.txt"); print a[1]}')
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_rdrp_blastx_results.txt
+    done
+
+    cat "$wd"/blast_results/*_anno_rdrp_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt
+    rm "$wd"/blast_results/*_anno_rdrp_blastx_results.txt
+
+    ## Do the same for the RVDB blast results for each library
+    echo "Number of RVDB Blast files loaded: " $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt | wc -l)
+    for i in $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt); do
+        id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RVDB_blastx_results.txt"); print a[1]}')
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_RVDB_blastx_results.txt
+    done
+
+    cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt
+    rm "$wd"/blast_results/*_anno_RVDB_blastx_results.txt
+    
+    ## Do the same for the Nr RdRp blast results for each library
+    #echo "Number of NR RDRP Blast files loaded: " $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt | wc -l)
+    #for i in $(ls "$wd"/blast_results/*_rdrp_nr_blastx_results.txt); do
+    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_rdrp_nr_blastx_results.txt"); print a[1]}')
+    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_rdrp_nr_blastx_results.txt
+    #done
+
+    #cat "$wd"/blast_results/*_rdrp_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_nr_blastx_results.txt
+    #rm "$wd"/blast_results/*_anno_rdrp_nr_blastx_results.txt
+
+    ## Do the same for the Nr RVDB blast results for each library
+    #echo "Number of NR RVDB Blast files loaded: " $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt | wc -l)
+    #for i in $(ls "$wd"/blast_results/*_RVDB_nr_blastx_results.txt); do
+    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RVDB_nr_blastx_results.txt"); print a[1]}')
+    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_RVDB_nr_blastx_results.txt
+    #done
+
+    #cat "$wd"/blast_results/*_RVDB_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_nr_blastx_results.txt
+    #rm "$wd"/blast_results/*_anno_RVDB_nr_blastx_results.txt
+    
+    ## Do the same for the Nt Rdrp blast results for each library
+    #echo "Number of NT RDRP Blast files loaded: " $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt | wc -l)
+    #for i in $(ls "$wd"/blast_results/*rdrp_nt_blastn_results.txt); do
+    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_rdrp_nt_blastn_results.txt"); print a[1]}')
+    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_rdrp_nt_blastn_results.txt
+    #done
+
+    #cat "$wd"/blast_results/*_rdrp_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_nt_blastn_results.txt
+    #rm "$wd"/blast_results/*_anno_rdrp_nt_blastn_results.txt
+
+    ### Do the same for the Nt RVDB blast results for each library
+    #echo "Number of NT RVDB Blast files loaded: " $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt | wc -l)
+    #for i in $(ls "$wd"/blast_results/*RVDB_nt_blastn_results.txt); do
+    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RVDB_nt_blastn_results.txt"); print a[1]}')
+    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_RVDB_nt_blastn_results.txt
+    #done
+
+   # cat "$wd"/blast_results/*_RVDB_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_nt_blastn_results.txt
+    #rm "$wd"/blast_results/*_anno_RVDB_nt_blastn_results.txt
+
+    # combine the two rdrp and rvdb verisons of each nt and nr blast
+    #cat "$wd"/blast_results/summary_table_creation/combined_RVDB_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt
+    #cat "$wd"/blast_results/summary_table_creation/combined_rdrp_nt_blastn_results.txt >> "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt
+
+    #cat "$wd"/blast_results/summary_table_creation/combined_rdrp_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt
+    #cat "$wd"/blast_results/summary_table_creation/combined_RVDB_nr_blastx_results.txt >> "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt
+
+
+    # lets also make a combined virus contig file in "$wd"/blast_results/summary_table_creation/ so that we can more easily extract contigs at a later stage
+    cat "$wd"/blast_results/*_rdrp_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta
+    cat "$wd"/blast_results/*_RVDB_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta
+    cat "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_contigs.fasta
+    cat "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta >> "$wd"/blast_results/summary_table_creation/combined_contigs.fasta
+    rm "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta
+
+    conda deactivate
+    conda activate r_env
+
+    # from all the blast results files create a joint table which we will filter in a later step
+    "$pathtoRscript"/Rscript "$scripts"/marsupial_create_blast_joint_table.R --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
+        --nt "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt \
+        --rdrp "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt \
+        --rvdb "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt \
+        --abundance "$wd"/blast_results/summary_table_creation/combined_abundance_table.txt \
+        --readcounts "$wd"/read_count/"$project"_accessions_reads \
+        --output "$wd"/blast_results/summary_table_creation/temp_joint_blast_table \
+        --rdrp_tax "$taxonomy"/RdRp-scan_0.90.info \
+        --rvdb_tax "$taxonomy"/RVDB_taxonomy_with_taxid.rds \
+        --multi_lib
+
+    conda activate project_pipeline
+
+    # Get lineage for all taxids
+    taxonkit lineage "$wd"/blast_results/summary_table_creation/temp_joint_blast_table_taxids \
+    | taxonkit reformat -I 1 -r "Unassigned" --fill-miss-rank -f "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}" \
+    | csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" > "$wd"/blast_results/summary_table_creation/temp_lineage_table
+
+    "$pathtoRscript"/Rscript "$scripts"/marsupial_filter_blast_table.R --blast_table "$wd"/blast_results/summary_table_creation/temp_joint_blast_table \
+        --taxnomy_table "$wd"/blast_results/summary_table_creation/temp_lineage_table \
+        --output "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')
+    
+}
+
+function extractContigsFromSummaryTable(){
+    summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
+    # input a table from project_filter_blast_table.R
+    # output a fasta file containing the contigs from that table
+    cat "$input_table" | cut -f1 -d"," | cut -f2 -d\" | uniq > "$wd"/temp_contig_list
+    grep -A1 -I -Ff "$wd"/temp_contig_list "$wd"/blast_results/summary_table_creation/combined_contigs.fasta > "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta
+    sed -i 's/--//' "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta # remove the white space
+    rm "$wd"/temp_contig_list 
+}
+
+function createTaxaFolderStructure(){
+    summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
+    cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv | cut -f2 -d"," | sort | uniq | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|" > "$wd"/blast_results/summary_table_creation/dirs.txt 
+    mkdir -p $(<"$wd"/blast_results/summary_table_creation/dirs.txt)
+    #rm "$wd"/blast_results/summary_table_creation/dirs.txt
+}
+
+function createTaxaViruContigFiles(){
+    # requires createTaxaFolderStructure to be run
+    summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
+    for i in $(cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv); do
+        contig=$(echo $i | cut -f1 -d",")
+        echo "$contig"
+        taxa=$(echo $i | cut -f2 -d"," | sed 's|\; .*||g' | sed 's/ //g' | rev | cut -f1 -d";" | rev)
+        echo "$taxa"
+        taxa_path=$(echo $i | cut -f2 -d"," | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|")
+        echo "$taxa_path"
+        grep -A1 "$contig" "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta >> "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta
+        sed -i 's/--//' "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta # remove -- from the contigs
+        sed -i '/^[[:space:]]*$/d' "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta # remove the white space
+    done    
+}
+
+wd="/project/$root_project/$project"
+scripts="/project/$root_project/$project/scripts/"
+abundance="/scratch/$root_project/$project/abundance/final_abundance"
+taxonomy="/project/jcomvirome/taxonomy"
+pathtoRscript="/project/jcomvirome/anaconda3/envs/r_env/lib/R/bin/"
+
+condaSetUp
+createSummaryTable
+input_table="$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_likely_viruses.csv
+extractContigsFromSummaryTable
+createTaxaFolderStructure
+createTaxaViruContigFiles
+input_table="$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_potential_viruses.csv
+extractContigsFromSummaryTable
+createTaxaFolderStructure
+createTaxaViruContigFiles
+zip -r "$wd"/blast_results/summary_table_creation/virus_fasta_files.zip "$wd"/blast_results/summary_table_creation/virus_fasta_files
+
+
