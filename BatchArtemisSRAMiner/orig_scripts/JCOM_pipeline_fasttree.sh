@@ -9,8 +9,11 @@
 
 # shell wrapper script to run fasttree
 # provide an alignment
-# Set the default queue
+
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 while getopts "i:q:r:p:" 'OPTKEY'; do
     case "$OPTKEY" in

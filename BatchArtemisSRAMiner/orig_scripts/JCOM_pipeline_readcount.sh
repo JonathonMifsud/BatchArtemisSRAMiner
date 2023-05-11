@@ -10,8 +10,10 @@
 # shell wrapper script to run read count getter for project folder. Note this is run in trim_assembly_assemble script by default 
 # if you are providing files include both the left and right file
 
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
  
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in

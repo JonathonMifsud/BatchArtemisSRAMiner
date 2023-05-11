@@ -14,8 +14,10 @@
 
 # You will need to provide the following arguments:
 
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 while getopts "p:f:q:r:d:" 'OPTKEY'; do
     case "$OPTKEY" in

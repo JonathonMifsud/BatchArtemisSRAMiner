@@ -14,7 +14,10 @@
 
 # provide a file containing SRA accessions - make sure it is full path to file -f 
 
-queue="defaultQ" # setting default value
+# Set the default values
+queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 while getopts "p:f:q:r:d:" 'OPTKEY'; do
     case "$OPTKEY" in

@@ -6,8 +6,10 @@
 #                                                                                                             #
 #                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 while getopts "i:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in

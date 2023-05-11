@@ -9,8 +9,10 @@
 
 # This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
 
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 # you can specify the accessions to look for using -f 
 # or if you don't specify -f it will run will all of the .fastq.gz files in your raw_reads folder

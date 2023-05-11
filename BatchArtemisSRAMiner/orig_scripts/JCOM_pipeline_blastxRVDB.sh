@@ -11,8 +11,10 @@
 # provide a file containing the names of the read files to run only one per library! example only the first of the pairs
 # if you do not provide it will use thoes in $project trimmed_reads
 
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 
 while getopts "p:f:q:r:" 'OPTKEY'; do

@@ -7,8 +7,10 @@
 # Get the current working directory
 wd=$(pwd)
 
-# Set the default queue
+# Set the default values
 queue="defaultQ"
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
 
 while getopts "i:d:p:r:" 'OPTKEY'; do
     case "$OPTKEY" in
