@@ -10,6 +10,11 @@ root="jcomvirome"
 # Project name
 project="JCOM_pipeline_virome"
 
+# email address
+email="jmif9945@uni.sydney.edu.au"
+
+
+
 # Define directory paths for convenience
 project_dir="/project/${root}/${project}"
 scratch_dir="/scratch/${root}/${project}"
@@ -30,5 +35,7 @@ find . -type f | while read -r file; do
     mv "$file" "$(echo "$file" | sed "s/JCOM_pipeline/$project/g")"
 done
 
-# Replace 'JCOM_pipeline' with the project name in file contents
-find . -type f -name '*' -exec sed -i "s/JCOM_pipeline/$project/g" {} \;
+sed -i .bak "s/JCOM_pipeline/$project/g" *
+rm *.bak
+sed -i .bak "s/jmif9945@uni.sydney.edu.au/$email/g" *
+rm *.bak

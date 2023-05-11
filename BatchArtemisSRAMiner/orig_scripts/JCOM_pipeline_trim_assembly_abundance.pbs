@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ###############################################################################################################
 #                                            BatchArtemisSRAMiner                                             #   
 #                                                JCO Mifsud                                                   # 
@@ -7,18 +8,16 @@
 #                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
-# Underlying pbs script that is run using the wrapper script YOURPROJECT_trim_assembly_abundance.sh
-# This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
-
-# you can specify the accessions to look for using -f 
-# or if you don't specify -f it will run will all of the .fastq.gz files in your raw_reads folder
+# This script trims, assembles reads using trimmomatic and megahit, and then quantifies abundance using RSEM
+# It runs with all .fastq.gz files in your raw_reads folder by default,
+# or you can specify the accessions to look for using -f 
 
 #PBS -N TrimMegaAbun
 #PBS -l select=1:ncpus=12:mem=120GB
 #PBS -M jmif9945@uni.sydney.edu.au
 #PBS -m abe
 
-##load modules
+# Load necessary modules
 module load megahit
 module load trimmomatic
 module load trinity/2.5.1
@@ -32,16 +31,16 @@ module unload bowtie2/2.2.5
 module unload perl/5.20.1
 module load perl/5.24.0
 
-##functions
+# Define functions
 
-function readTrimmomatic() { # used to quality trim and remove adapter sequences from reads
-
-    # in case the TruSeq3 adapters are not in path we will download them to the wd
-    # check the file as sometime it doesnt download properly and results in unknown trimmer error
-    #wget https://raw.githubusercontent.com/timflutre/trimmomatic/master/adapters/TruSeq3-PE.fa -O "$wd"/TruSeq3-PE.fa 
+# Function to quality trim and remove adapter sequences from reads
+readTrimmomatic() {
+    # In case the TruSeq3 adapters are not in path we will download them to the working directory
+    # Check the file as sometimes it doesn't download properly and results in unknown trimmer error
     if [[ "$layout" == "single" ]]; then
-    cp /project/VELAB/adapters/TruSeq3-SE.fa ./
+        cp /project/VELAB/adapters/TruSeq3-SE.fa ./
         echo -e "MEGAHIT_SCRIPT: READ TRIMMOMATIC SINGLE - READ QC"
+        # Quality control for single-end reads
         trimmomatic SE \
             -threads "$CPU" \
             "$inpath"/"$library_id".fastq.gz \
@@ -49,7 +48,7 @@ function readTrimmomatic() { # used to quality trim and remove adapter sequences
             ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25
     fi
     if [[ "$layout" == "paired" ]]; then
-    cp /project/VELAB/adapters/oint_TruSeq3_Nextera-PE.fa ./
+        cp /project/VELAB/adapters/oint_TruSeq3_Nextera-PE.fa ./
         echo -e "MEGAHIT_SCRIPT: READ TRIMMOMATIC PAIRED - READ QC"
         trimmomatic PE \
             -threads "$CPU" \
