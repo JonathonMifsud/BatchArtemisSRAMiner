@@ -1,4 +1,4 @@
-Installation
+## Installation
 
 Download the BatchArtemisSRAMiner package and unzip it.
 Open the setup script, add your details, and run the script.
@@ -10,7 +10,7 @@ If you are unsure about what variables/files need to be passed to a script, refe
 
 The scripts are designed to process batches, so they require a list of filenames to run.
 
-Pipeline
+## Pipeline
 The standard pipeline follows these steps:
 
 Download SRA
@@ -22,11 +22,11 @@ Generate a summary table
 Custom Blasts
 The custom blast scripts are useful for running other blasts, but they require some adjustments to be compatible with the final summary table scripts.
 
-Monitoring Job Status
+### Monitoring Job Status
 
 You can check the status of a job using qstat -u USERNAME. This will show you the status of the batch scripts. To check the status of individual subjobs within a batch, use qstat -tx JOB_ID.
 
-Job Status Shortcut
+###Job Status Shortcut
 Replace jmif9945 with your unikey and run the following line to create an alias for 'q'. This will display two panels: the top panel shows the last 100 jobs/subjobs, while the bottom panel provides a summary of batch jobs:
 
 alias q="qstat -Jtan1 -xu jmif9945 | tail -n100; qstat -u jmif9945"
@@ -42,7 +42,7 @@ Note: Flags can vary between scripts, so always check the individual .sh scripts
 
 TO BE ADDED
 
-Troubleshooting
+## Troubleshooting
 
 If your SRA fails, check the error and output logs in the logs folder in the project branch.
 
@@ -55,15 +55,15 @@ Other reasons for download failure could be invalid SRA run id or insufficient s
 Trimming/Assembly Failure
 The most common cause of trimming/assembly failure is a corrupt download. In this case, it's best to remove, redownload, and reassemble the data.
 
-Non-SRA Libraries
+### Non-SRA Libraries
 
-You can also use the script with non-SRA libraries by cleaning the original raw read names. For example, `hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC
+You can also use the script with non-SRA libraries by cleaning the original raw read names. For example, `hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC`
 
 E.g., hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC_L002_R1.fastq.gz -> hpv3t10_1.fastq.gz
 The main thing is that underscores are only used to seperate the ID (hpv3t10) and the read file direction (1) and that the "R" in R1/2 is remove. 
 
 
-Installing Anaconda
+## Installing Anaconda
 
 Conda is a package manager that can be used to install packages that aren't readily available through the module. This is necessary because Artemis lacks some required modules/module versions. The primary use cases here are CCmetagen and the summary table script.
 
