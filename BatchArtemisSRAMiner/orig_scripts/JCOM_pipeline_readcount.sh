@@ -7,7 +7,7 @@
 #                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
-# shell wrapper script to run read count getter for project folder
+# shell wrapper script to run read count getter for project folder. Note this is run in trim_assembly_assemble script by default 
 # if you are providing files include both the left and right file
 
  
@@ -97,5 +97,5 @@ qsub -J $jPhrase \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
     -l "$job_time" \
-    -P "RDS-FSC-$queue_project-RW" \
+    -P "$queue_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_readcount.pbs

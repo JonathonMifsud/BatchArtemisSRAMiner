@@ -1,0 +1,15 @@
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -l select=1:ncpus=6:mem=20GB
+#PBS -N fasttree
+
+# Module load
+module load fasttree/2.1.9
+
+
+wd="$(dirname "${alignment}")"             # working dir 
+filename="$(basename -- "$alignment")" # filename to be used in outfile
+outpath="$wd"          # location of SRA files to be downloaded to
+# cd working dir
+cd "$wd" || exit
+
+FastTree -lg -quote "$alignment" > "$alignment"_fasttree.newick

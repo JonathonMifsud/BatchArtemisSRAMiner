@@ -100,5 +100,5 @@ qsub -J $jPhrase \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
     -l "$job_time" \
-    -P "RDS-FSC-$queue_project-RW" \
+    -P "$queue_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_sra.pbs

@@ -14,7 +14,9 @@
 
 # provide a file containing SRA accessions - make sure it is full path to file -f 
 
-while getopts "p:f:q:r:" 'OPTKEY'; do
+queue="defaultQ" # setting default value
+
+while getopts "p:f:q:r:d:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
                 # 
@@ -31,7 +33,11 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             'r')
                 #
                 root_project="$OPTARG"
-                ;;    
+                ;;
+            'd')
+                #
+                database="$OPTARG"
+                ;; 
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -55,6 +61,12 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             echo "No root project string entered. Use -r VELAB or -r jcomvirome"
     exit 1
     fi
+
+    if [ "$database" = "" ]
+        then
+            echo "No database specified. Use -d /scratch/VELAB/Databases/Blast/nt.Mar-2023/nt"
+    exit 1
+    fi
     
     if [ "$file_of_accessions" = "" ]
         then
@@ -63,6 +75,10 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_blastNT"
         else    
             export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
+    fi
+
+    if [ "$queue" = "defaultQ" ]; then
+        echo "Queue set to defaultQ"
     fi
 
     # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
@@ -131,9 +147,9 @@ if [ "$jPhrase" == "0-0" ]; then
 fi
 
 qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$(date '+%Y%m%d')_stderr.txt" \
-    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,blast_para=$blast_para,cpu=$cpu" \
+    -o "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
+    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,blast_para=$blast_para,cpu=$cpu,db=$db" \
     -q "$queue" \
     -l "$job_time" \
     -l "$cpu" \

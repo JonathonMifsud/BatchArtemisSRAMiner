@@ -14,7 +14,10 @@
 
 # You will need to provide the following arguments:
 
-while getopts "p:f:q:r:" 'OPTKEY'; do
+# Set the default queue
+queue="defaultQ"
+
+while getopts "p:f:q:r:d:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
                 # 
@@ -24,6 +27,10 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
                 # 
                 file_of_accessions="$OPTARG"
                 ;;
+            'd')
+                #
+                db="$OPTARG"
+                ;;                          
             'q')
                 # 
                 queue="$OPTARG"
@@ -55,6 +62,12 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             echo "No root project string entered. Use -r VELAB or -r jcomvirome"
     exit 1
     fi
+
+    if [ "$db" = "" ]
+        then
+            echo "No database specified. Use -d option to specify the database."
+            exit 1
+    fi
     
     if [ "$file_of_accessions" = "" ]
         then
@@ -71,9 +84,9 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
         then 
             job_time="walltime=48:00:00"
             queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
-            cpu="ncpus=24"
+            cpu="ncpus=12"
             mem="mem=120GB"
-            diamond_cpu="24"
+            diamond_cpu="12"
             diamond_mem="4"
             diamond_para="-e 1E-4 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k10 --tmpdir /scratch/$root_project/"
     fi
@@ -137,9 +150,9 @@ fi
 
 # Run the blastx jobs
 qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$(date '+%Y%m%d')_stderr.txt" \
-    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,diamond_para=$diamond_para" \
+    -o "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
+    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,diamond_para=$diamond_para,db=$db" \
     -q "$queue" \
     -l "$job_time" \
     -l "$cpu" \

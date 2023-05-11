@@ -30,7 +30,7 @@ function BlastxRVDB {
 
 #tool to extract contigs from trinity assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_RVDB_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+    grep -i ".*" "$outpath"/"$library_id"_RVDB_blastx_results.txt | cut -f1 | sort | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
 	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_RVDB_blastcontigs.fasta
     sed -i 's/--//' "$outpath"/"$library_id"_RVDB_blastcontigs.fasta # remove -- from the contigs
     sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_RVDB_blastcontigs.fasta # remove the white space

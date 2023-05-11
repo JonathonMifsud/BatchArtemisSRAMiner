@@ -1,46 +1,34 @@
 #!/bin/bash
-###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
-###############################################################################################################
 
-# Setup script to create a project folder and subfolders to run the batch pipeline
+# This script sets up a project with a specified structure in the provided root directory.
+# It also moves all files from the current directory to the project's script directory 
+# and replaces 'JCOM_pipeline' with the project name in file names and file contents.
 
-# Root folder for all projects
-root="jcomvirome" # this is your RDS project name, it could be VELAB if you want everything to run there
+# Root directory for all projects
+root="jcomvirome"
 
-# Provide a project name as a string
-project="JCOM_pipeline_virome" # this is the name of the project folder you want to create
+# Project name
+project="JCOM_pipeline_virome"
 
-mkdir /project/"$root"/"$project"/
-mkdir /project/"$root"/"$project"/scripts
-mkdir /project/"$root"/"$project"/accession_lists
-mkdir /scratch/"$root"/"$project"/
-mkdir /project/"$root"/"$project"/adapters
-mkdir /project/"$root"/"$project"/logs
-mkdir /project/"$root"/"$project"/ccmetagen
-mkdir /project/"$root"/"$project"/blast_results
-mkdir /project/"$root"/"$project"/annotation
-mkdir /project/"$root"/"$project"/mapping
-mkdir /project/"$root"/"$project"/contigs
-mkdir /project/"$root"/"$project"/contigs/final_logs
-mkdir /project/"$root"/"$project"/contigs/final_contigs
-mkdir /project/"$root"/"$project"/fastqc
-mkdir /project/"$root"/"$project"/read_count
-mkdir /scratch/"$root"/"$project"/abundance
-mkdir /scratch/"$root"/"$project"/read_count
-mkdir /scratch/"$root"/"$project"/raw_reads
-mkdir /scratch/"$root"/"$project"/trimmed_reads
+# Define directory paths for convenience
+project_dir="/project/${root}/${project}"
+scratch_dir="/scratch/${root}/${project}"
 
-mv ./* /project/"$root"/"$project"/scripts
-cd /project/"$root"/"$project"/scripts
+# Create project directories in /project and /scratch
+# The -p option creates parent directories as needed and doesn't throw an error if the directory already exists.
+mkdir -p "${project_dir}"/{scripts,accession_lists,adapters,logs,ccmetagen,blast_results,annotation,mapping,contigs/{final_logs,final_contigs},fastqc,read_count}
+mkdir -p "${scratch_dir}"/{abundance,read_count,raw_reads,trimmed_reads}
 
-find . -type f | while read FILE
-do
-    mv $FILE $(echo $FILE | sed "s/JCOM_pipeline/$project/g")
+# Move all files from the current directory to the project's scripts directory
+mv ./* "${project_dir}/scripts"
+
+# Navigate to the project's scripts directory
+cd "${project_dir}/scripts"
+
+# Replace 'JCOM_pipeline' with the project name in file names
+find . -type f | while read -r file; do
+    mv "$file" "$(echo "$file" | sed "s/JCOM_pipeline/$project/g")"
 done
 
+# Replace 'JCOM_pipeline' with the project name in file contents
 find . -type f -name '*' -exec sed -i "s/JCOM_pipeline/$project/g" {} \;

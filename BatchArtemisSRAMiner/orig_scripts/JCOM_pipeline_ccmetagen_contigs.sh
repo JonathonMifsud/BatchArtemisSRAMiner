@@ -1,15 +1,4 @@
 #!/bin/bash
-###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
-###############################################################################################################
-
-# shell wrapper script to run blastx against the RdRp database
-# provide a file containing the names of the read files to run only one per library! example only the first of the pairs
-# if you do not provide it will use thoes in $project trimmed_reads
 
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
@@ -28,7 +17,7 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             'r')
                 #
                 root_project="$OPTARG"
-                ;;                              
+                ;;    
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -43,23 +32,29 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p 1_dogvirome or -p 2_sealvirome"
+            echo "No project string entered. Use -p cyanobacteria_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use -r VELAB or -r $root_project"
     exit 1
     fi
 
     if [ "$file_of_accessions" = "" ]
         then
             echo "No file containing files to run specified running all files in /project/$root_project/$project/contigs/final_contigs/"
-            ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa > /project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_blastx_rdrp
-            export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_blastx_rdrp"
+            ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa > /project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_ccmetagen
+            export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_ccmetagen"
         else    
             export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
     fi
 
-     # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
+    # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
     if [ "$queue" = "defaultQ" ]
         then 
-            job_time="walltime=24:00:00"
+            job_time="walltime=84:00:00"
             queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
     fi
 
@@ -85,12 +80,12 @@ if [ "$jPhrase" == "0-0" ]; then
     export jPhrase="0-1"
 fi
 
+
 qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+    -o "/project/$root_project/$project/logs/ccmetagen_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/ccmetagen_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
     -l "$job_time" \
     -P "$queue_project" \
-    /project/"$root_project"/"$project"/scripts/JCOM_pipeline_blastxRdRp.pbs
-    
+    /project/$root_project/$project/scripts/JCOM_pipeline_ccmetagen_contigs.pbs

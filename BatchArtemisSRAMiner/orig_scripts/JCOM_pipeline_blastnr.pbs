@@ -19,7 +19,7 @@ module load diamond
 
 # blastx
 function BlastxNR {
-    diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$nr_db" -o "$outpath"/"$library_id"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
+    diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$db" -o "$outpath"/"$library_id"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
 }
 
 #tool to extract contigs from assembly Blast to fasta
@@ -42,9 +42,6 @@ library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
-
-# database
-nr_db=/scratch/VELAB/Databases/Blast/nr.Mar-2023.dmnd
 
 # cd working dir
 cd "$wd" || exit

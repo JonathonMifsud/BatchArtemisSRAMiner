@@ -21,7 +21,7 @@
 module load blast+
 
 function Blastn {
-    blastn -query "$inpath"/"$library_id".contigs.fa -db "$nt_db" -out "$outpath"/"$library_id"_nt_blastn_results.txt -max_target_seqs 10 -num_threads 22 -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
+    blastn -query "$inpath"/"$library_id".contigs.fa -db "$db" -out "$outpath"/"$library_id"_nt_blastn_results.txt -max_target_seqs 10 -num_threads 22 -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
 }
 
 #tool to extract contigs from assembly Blast to fasta
@@ -44,7 +44,6 @@ library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
-nt_db=/scratch/VELAB/Databases/Blast/nt.Mar-2023/nt
 
 # cd working dir
 cd "$wd" || exit
