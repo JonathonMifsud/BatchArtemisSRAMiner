@@ -6,7 +6,10 @@
 # Get the current working directory
 wd=$(pwd)
 
-while getopts "i:d:" 'OPTKEY'; do
+# Set the default queue
+queue="defaultQ"
+
+while getopts "i:d:p:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'i')
                 # 
@@ -15,7 +18,15 @@ while getopts "i:d:" 'OPTKEY'; do
             'd')
                 #
                 db="$OPTARG"
-                ;;                              
+                ;;
+            'p')
+                # 
+                project="$OPTARG"
+                ;;
+            'r')
+                #
+                root_project="$OPTARG"
+                ;;                                  
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -34,11 +45,22 @@ while getopts "i:d:" 'OPTKEY'; do
     exit 1
     fi
 
-
     if [ "$db" = "" ]
         then
             echo "No database specified. Use -d option to specify the database."
             exit 1
+    fi
+
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
     fi
 
 input_basename=$(basename "$input")

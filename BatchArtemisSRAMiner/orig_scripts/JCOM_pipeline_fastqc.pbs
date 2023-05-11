@@ -1,0 +1,18 @@
+#PBS -P RDS-FSC-VELAB-RW
+#PBS -N fastqc
+#PBS -l select=1:ncpus=12:mem=120GB
+#PBS -l walltime=48:00:00
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
+
+module load fastqc/0.11.8
+cd /project/jcomvirome/"$project"/fastqc
+
+readarray -t myarray < "$file_of_accessions"
+export library_run=${myarray["$PBS_ARRAY_INDEX"]}
+
+fastqc "$library_run" \
+    --format fastq \
+    --threads 12 \
+    --outdir /project/jcomvirome/"$project"/fastqc
+

@@ -9,8 +9,10 @@
 
 # shell wrapper script to run fasttree
 # provide an alignment
+# Set the default queue
+queue="defaultQ"
 
-while getopts "i:q:" 'OPTKEY'; do
+while getopts "i:q:r:p:" 'OPTKEY'; do
     case "$OPTKEY" in
             'i')
                 # 
@@ -20,6 +22,14 @@ while getopts "i:q:" 'OPTKEY'; do
                 # 
                 queue="$OPTARG"
                 ;;
+            'r')
+                #
+                root_project="$OPTARG"
+                ;;
+            'p')
+                # 
+                project="$OPTARG"
+                ;;                              
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -37,6 +47,19 @@ while getopts "i:q:" 'OPTKEY'; do
             echo "No alignment provided to align use -i myseqs.fasta" 
     exit 1
     fi
+
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
+    fi
+    
 
      # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
     if [ "$queue" = "defaultQ" ]

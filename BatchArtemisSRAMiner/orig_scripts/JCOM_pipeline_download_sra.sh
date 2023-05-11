@@ -16,6 +16,9 @@
 
 # provide a file containing SRA accessions - make sure it is full path to file -f 
 
+# Set the default queue
+queue="defaultQ"
+
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
@@ -48,15 +51,16 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p cichlid_virome"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
     fi
 
     if [ "$root_project" = "" ]
         then
-            echo "No root project string entered. Use -r VELAB or -r jcomvirome"
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
+    
 
     if [ "$file_of_accessions" = "" ]
         then

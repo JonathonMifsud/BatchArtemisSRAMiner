@@ -10,6 +10,8 @@
 # shell wrapper script to run read count getter for project folder. Note this is run in trim_assembly_assemble script by default 
 # if you are providing files include both the left and right file
 
+# Set the default queue
+queue="defaultQ"
  
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
@@ -42,13 +44,13 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
     shift $(( OPTIND - 1 ))
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p 1_dogvirome or -p 2_sealvirome"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
     fi
 
-     if [ "$root_project" = "" ]
+    if [ "$root_project" = "" ]
         then
-            echo "No root project string entered. Use -r VELAB or -r jcomvirome"
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
 

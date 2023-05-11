@@ -9,6 +9,9 @@
 
 # This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
 
+# Set the default queue
+queue="defaultQ"
+
 # you can specify the accessions to look for using -f 
 # or if you don't specify -f it will run will all of the .fastq.gz files in your raw_reads folder
 # provide a file containing SRA accessions - make sure it is full path to file -f 
@@ -45,13 +48,13 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p JCOM_pipeline_virome"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
     fi
 
     if [ "$root_project" = "" ]
         then
-            echo "No root project string entered. Use -r VELAB or -r jcomvirome"
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
     

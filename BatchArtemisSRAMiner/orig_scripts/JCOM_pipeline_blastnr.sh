@@ -53,13 +53,13 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p 1_dogvirome or -p 2_sealvirome or cichlid_virome"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
     fi
 
     if [ "$root_project" = "" ]
         then
-            echo "No root project string entered. Use -r VELAB or -r jcomvirome"
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
 

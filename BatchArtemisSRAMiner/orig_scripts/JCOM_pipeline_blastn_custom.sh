@@ -6,7 +6,7 @@
 # Get the current working directory
 wd=$(pwd)
 
-while getopts "i:d:" 'OPTKEY'; do
+while getopts "i:d:p:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'i')
                 # 
@@ -15,7 +15,15 @@ while getopts "i:d:" 'OPTKEY'; do
             'd')
                 #
                 db="$OPTARG"
-                ;;                              
+                ;;
+            'p')
+                # 
+                project="$OPTARG"
+                ;;
+            'r')
+                #
+                root_project="$OPTARG"
+                ;;                                  
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -40,6 +48,17 @@ while getopts "i:d:" 'OPTKEY'; do
             exit 1
     fi
 
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
+    fi
    
 input_basename=$(basename "$input")
 
@@ -49,6 +68,4 @@ qsub -o "/project/$root_project/$project/logs/blastn_$input_basename_$(date '+%Y
     -q "defaultQ" \
     -l "walltime=48:00:00" \
     -P "jcomvirome" \
-     /project/$root_project/$project/scripts/project_blastn_custom.pbs
-    
-
+     /project/$root_project/$project/scripts/JCOM_pipeline_blastn_custom.pbs

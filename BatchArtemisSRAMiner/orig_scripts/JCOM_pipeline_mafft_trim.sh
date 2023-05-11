@@ -6,8 +6,10 @@
 #                                                                                                             #
 #                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
+# Set the default queue
+queue="defaultQ"
 
-while getopts "i:q:" 'OPTKEY'; do
+while getopts "i:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'i')
                 # 
@@ -17,6 +19,10 @@ while getopts "i:q:" 'OPTKEY'; do
                 # 
                 queue="$OPTARG"
                 ;;
+            'r')
+                #
+                root_project="$OPTARG"
+                ;;                              
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -34,6 +40,19 @@ while getopts "i:q:" 'OPTKEY'; do
             echo "No sequences provided to align use -i myseqs.fasta" 
     exit 1
     fi
+
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
+    fi
+    
 
      # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
     if [ "$queue" = "defaultQ" ]
@@ -55,10 +74,10 @@ while getopts "i:q:" 'OPTKEY'; do
     fi
 
 
-qsub -o "/project/jcomvirome/logs/mafft_alignment_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/jcomvirome/logs/mafft_alignment_$(date '+%Y%m%d')_stderr.txt" \
+qsub -o "/project/$root_project/$project/logs/mafft_alignment_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/mafft_alignment_$(date '+%Y%m%d')_stderr.txt" \
     -v "sequences=$sequences" \
     -q "$queue" \
     -l "$job_time" \
     -P "$queue_project" \
-    /project/jcomvirome/random_scripts/project_scripts/project_mafft_trim.pbs
+   /project/$root_project/$project/scripts/JCOM_pipeline_mafft_trim.pbs

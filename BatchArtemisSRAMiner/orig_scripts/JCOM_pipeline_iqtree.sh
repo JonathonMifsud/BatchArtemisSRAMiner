@@ -9,10 +9,12 @@
 
 # shell wrapper script to run iqtree
 # provide an alignment
-
 model="MFP"
 
-while getopts "i:q:m:" 'OPTKEY'; do
+# Set the default queue
+queue="defaultQ"
+
+while getopts "i:q:m:r:p:" 'OPTKEY'; do
     case "$OPTKEY" in
             'i')
                 # 
@@ -26,6 +28,14 @@ while getopts "i:q:m:" 'OPTKEY'; do
                 # 
                 model="$OPTARG"
                 ;;
+            'r')
+                #
+                root_project="$OPTARG"
+                ;;
+            'p')
+                # 
+                project="$OPTARG"
+                ;;                              
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -43,6 +53,19 @@ while getopts "i:q:m:" 'OPTKEY'; do
             echo "No alignment provided to align use -i myseqs.fasta" 
     exit 1
     fi
+
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
+    fi
+    
 
      # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
     if [ "$queue" = "defaultQ" ]
@@ -70,4 +93,4 @@ qsub -o "/project/$root_project/$project/logs/iqtree_$(date '+%Y%m%d')_stout.txt
     -q "$queue" \
     -l "$job_time" \
     -P "$queue_project" \
-    /project/$root_project/$project/random_scripts/project_scripts/project_iqtree.pbs
+    /project/$root_project/$project/scripts/JCOM_pipeline_iqtree.pbs

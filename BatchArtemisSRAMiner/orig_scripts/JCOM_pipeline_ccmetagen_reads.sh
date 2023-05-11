@@ -7,6 +7,9 @@
 #                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
+# Set the default queue
+queue="defaultQ"
+
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
         'p')
@@ -37,19 +40,18 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 done
 shift $(( OPTIND - 1 ))
 
-# Check if project name is provided
-if [ -z "$project" ]
-    then
-        echo "No project string entered. Use -p cyanobacteria_virome"
-        exit 1
-fi
+    if [ "$project" = "" ]
+        then
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
 
-# Check if root project name is provided
-if [ -z "$root_project" ]
-    then
-        echo "No root project string entered. Use -r VELAB or -r $root_project"
-        exit 1
-fi
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    exit 1
+    fi
+    
 
 # Check if file containing file names/accessions is provided
 if [ -z "$file_of_accessions" ]

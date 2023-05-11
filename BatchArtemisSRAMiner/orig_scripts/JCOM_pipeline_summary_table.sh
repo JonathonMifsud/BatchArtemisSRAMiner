@@ -9,6 +9,9 @@
 
 # shell wrapper script to run the summary table script
 
+# Set the default queue
+queue="defaultQ"
+
 while getopts "p:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
@@ -37,13 +40,13 @@ while getopts "p:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p and the name of your project"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
     fi
 
     if [ "$root_project" = "" ]
         then
-            echo "No root project string entered. Use -r VELAB or -r your root project name."
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
 

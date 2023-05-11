@@ -35,7 +35,11 @@ find . -type f | while read -r file; do
     mv "$file" "$(echo "$file" | sed "s/JCOM_pipeline/$project/g")"
 done
 
+sed -i .bak "s/JCOM_pipeline_virome/$project/g" *
+rm *.bak
 sed -i .bak "s/JCOM_pipeline/$project/g" *
+rm *.bak
+sed -i .bak "s/jcomvirome/$root/g" *
 rm *.bak
 sed -i .bak "s/jmif9945@uni.sydney.edu.au/$email/g" *
 rm *.bak

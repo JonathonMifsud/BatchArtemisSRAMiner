@@ -11,6 +11,9 @@
 # provide a file containing the names of the read files to run only one per library! example only the first of the pairs
 # if you do not provide it will use thoes in $project trimmed_reads
 
+# Set the default queue
+queue="defaultQ"
+
 while getopts "p:f:q:r:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
@@ -43,7 +46,13 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
 
     if [ "$project" = "" ]
         then
-            echo "No project string entered. Use -p 1_dogvirome or -p 2_sealvirome"
+            echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    exit 1
+    fi
+
+    if [ "$root_project" = "" ]
+        then
+            echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
     fi
 
