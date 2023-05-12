@@ -18,7 +18,7 @@
 #PBS -N ascp_SRA_download
 #PBS -M jmif9945@uni.sydney.edu.au
 #PBS -m abe
-#PBS -l select=1:ncpus=6:mem=80GB
+#PBS -l select=1:ncpus=2:mem=30GB
 
 
 module load kingfisher
