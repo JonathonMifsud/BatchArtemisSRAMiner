@@ -41,6 +41,8 @@ The standard pipeline follows these steps:
 5. Run blastnr and blastnt
 6. Generate a summary table
 
+The large files e.g., raw and trimmed reads and abundance files are stored in /scratch/ while the smaller files tend to be in /project/
+
 
 ### Custom Blasts
 The custom blast scripts are useful for running other blasts, but they require some adjustments to be compatible with the final summary table scripts.
