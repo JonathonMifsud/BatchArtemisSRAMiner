@@ -14,6 +14,13 @@ Download the BatchArtemisSRAMiner package:
 6. Run the setup script `./setup.sh`
 7. `cd ../../../` and remove the install files `rm BatchArtemisSRAMiner-main BatchArtemisSRAMiner-main.zip`
 
+Optional:
+Add the commands to your path
+`nano ~/.bashrc`
+Add the line: `export PATH="/project/YOURROOT/YOURPROJECT/scripts/:$PATH"`
+Make sure to change the variable names!
+Then to load it: `source ~/.bashrc`
+
 
 Each general task you want to run is associated with a .sh (shell) and .pbs script. The .sh script works as a wrapper, passing parameters and variables to the .pbs script. After setting up, you usually don't need to edit the .pbs script.
 
