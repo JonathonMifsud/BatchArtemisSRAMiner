@@ -35,11 +35,17 @@ The scripts are designed to process batches, so they require a list of filenames
 The standard pipeline follows these steps:
 
 1. Download SRA
-2. Trim Assembly Abundance
-3. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
-4. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
-5. Run blastnr and blastnt
-6. Generate a summary table
+2. Check the that the raw reads have downloaded by looking in /scratch/your_root/your_project/raw_reads . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
+3. Trim Assembly Abundance
+4. Check that all contigs are non-zero in size in /project/your_root/your_project/contigs/final_contigs/
+6. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
+7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc. 
+The reason I do this is that it is expensive to run NT / NR blasts for each contig file because the giant databases have to be loaded in each time. Instead you concatentate all of the blast contigs together and run it once. 
+E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
+6. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
+7. Create an input accession file containing `combined`
+8. Run blastnr and blastnt using this input file. 
+9. Generate a summary table (Anaconda is needed - see below)
 
 The large files e.g., raw and trimmed reads and abundance files are stored in /scratch/ while the smaller files tend to be in /project/
 
