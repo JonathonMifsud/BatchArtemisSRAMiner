@@ -1,7 +1,7 @@
 ## Installation
 
 A repo containing tools and shortcuts for virus discovery workflows on Artemis with a particular focus on SRA mining.
-If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress!
+If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress so please let me know if I should add anything!
 
 
 Download the BatchArtemisSRAMiner package:
@@ -37,17 +37,17 @@ The standard pipeline follows these steps:
 1. Download SRA
 2. Check the that the raw reads have downloaded by looking in /scratch/your_root/your_project/raw_reads . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
 3. Trim Assembly Abundance
-4. Check that all contigs are non-zero in size in /project/your_root/your_project/contigs/final_contigs/
+4. Check that all contigs are non-zero in size in `/project/your_root/your_project/contigs/final_contigs/`
 6. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
 7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc. 
 The reason I do this is that it is expensive to run NT / NR blasts for each contig file because the giant databases have to be loaded in each time. Instead you concatentate all of the blast contigs together and run it once. 
 E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
-6. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
-7. Create an input accession file containing `combined`
-8. Run blastnr and blastnt using this input file. 
-9. Generate a summary table (Anaconda is needed - see below)
+8. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
+9. Create an input accession file containing `combined`
+10. Run blastnr and blastnt using this input file. 
+11. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. 
 
-The large files e.g., raw and trimmed reads and abundance files are stored in /scratch/ while the smaller files tend to be in /project/
+The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
 
 
 ### Custom Blasts
@@ -70,14 +70,26 @@ Then to load it: `source ~/.bashrc`
 
 ### Common Flags
 
-Note: Flags can vary between scripts, so always check the individual .sh scripts. However, the common flags are as follows:
+Note: Flags can vary between scripts, so always check the individual `.sh` scripts. However, the common flags are as follows:
 
-TO BE ADDED
+`-f` used to specify a file that contains the SRA run accessions to be processed. This option is followed by a string containing the complete path to a file containing accessions. I typically store these files in `/project/your_root/your_project/accession_lists/`. If this option is not provided, most of the scripts in the pipeline will fail or excetue other behaviours (e.g., see the -f in `trim_assembly_abundance.sh`), as such I always recommmend setting the -f where able so you can better keep track of the libraries you are running. 
+
+**Less common**
+`-i` The input option. This option is followed by a string that represents the input file for the script. This is used most commonly in the custom blast scripts where you are interested in a single input rather than an array of files. 
+`-d` The database option. This option should be followed by a string that represents the complete path to a database against which blast will be run.
+
+**Rarely need to change**
+The way the pipeline is set up the values for root and project that you entered in the setup script are used as the default project (-p flag) and root (-r flag) values in all scripts.
+There may be cases where you want to run these functions in directories outside of the normal pipeline structure. The blast custom scripts, mafft alignment and iqtree scripts are designed with this inmind. Input is specified using -i, while the output is the current WD. With other functions it may just be easier to redownload the github .zip file and rerun the setup script as described above - creating the folder sctruture and scripts for the new project.
+
+`-p` The project option. This option should be followed by a string that represents the project name i.e. what you entered as project in the original setup script. 
+`-r` The root project option. This option should be followed by a string that represents the root project name. Use e.g., -r VELAB or the value you entered for root in the original setup script. 
+
+You only need to specify -p or -r if you are going outside of the directory stucture in which the setup.sh was ran for. 
 
 ## Troubleshooting
 
 If your SRA fails, check the error and output logs in the logs folder in the project branch.
-
 
 Downloading Failure
 Downloads often time out, and while the script will attempt to download multiple times, it might eventually fail. If this happens, use the check_sra_downloads.sh script to identify which libraries failed. This script will generate a file that can be fed back into -f.
@@ -93,7 +105,6 @@ You can also use the script with non-SRA libraries by cleaning the original raw 
 
 E.g., hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC_L002_R1.fastq.gz -> hpv3t10_1.fastq.gz
 The main thing is that underscores are only used to seperate the ID (hpv3t10) and the read file direction (1) and that the "R" in R1/2 is remove. 
-
 
 ## Installing Anaconda
 
@@ -120,3 +131,8 @@ To create the environments:
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/ccmetagen_env.yml`
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/project_pipeline.yml`
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomyr_env.yml`
+
+
+### Storage:
+I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
+
