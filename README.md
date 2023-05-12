@@ -17,8 +17,11 @@ Download the BatchArtemisSRAMiner package:
 Optional:
 Add the commands to your path
 `nano ~/.bashrc`
-Add the line: `export PATH="/project/YOURROOT/YOURPROJECT/scripts/:$PATH"`
+Add the line: 
+`export PATH="/project/YOURROOT/YOURPROJECT/scripts/:$PATH"`
+
 Make sure to change the variable names!
+
 Then to load it: `source ~/.bashrc`
 
 
