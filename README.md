@@ -57,7 +57,7 @@ The custom blast scripts are useful for running other blasts, but they require s
 
 You can check the status of a job using `qstat -u USERNAME`. This will show you the status of the batch scripts. To check the status of individual subjobs within a batch, use `qstat -tx JOB_ID`.
 
-###Job Status Shortcut
+### Job Status Shortcut
 Replace jmif9945 with your unikey and run the following line to create an alias for `q`. This will display two panels: the top panel shows the last 100 jobs/subjobs, while the bottom panel provides a summary of batch jobs:
 
 `alias q="qstat -Jtan1 -xu jmif9945 | tail -n100; qstat -u jmif9945"`
