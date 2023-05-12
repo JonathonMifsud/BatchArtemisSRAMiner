@@ -30,16 +30,15 @@ mv ./* "${project_dir}/scripts"
 # Navigate to the project's scripts directory
 cd "${project_dir}/scripts"
 
-# Replace 'JCOM_pipeline' with the project name in file names
 find . -type f | while read -r file; do
-    mv "$file" "$(echo "$file" | sed "s/JCOM_pipeline/$project/g")"
+    new_file="$(echo "$file" | sed "s/JCOM_pipeline/$project/g")"
+    if [ "$file" != "$new_file" ]; then
+        mv "$file" "$new_file"
+    fi
 done
 
-sed -i .bak "s/JCOM_pipeline_virome/$project/g" *
-rm *.bak
-sed -i .bak "s/JCOM_pipeline/$project/g" *
-rm *.bak
-sed -i .bak "s/jcomvirome/$root/g" *
-rm *.bak
-sed -i .bak "s/jmif9945@uni.sydney.edu.au/$email/g" *
-rm *.bak
+sed -i "s/JCOM_pipeline_virome/$project/g" *
+sed -i "s/JCOM_pipeline/$project/g" *
+sed -i "s/jcomvirome/$root/g" *
+sed -i "s/jmif9945@uni.sydney.edu.au/$email/g" *
+
