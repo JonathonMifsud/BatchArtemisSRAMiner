@@ -98,7 +98,10 @@ Download the Anaconda installer script from the Anaconda distribution site. You 
 
 Press ENTER to continue and review the license agreement. Press `ENTER` again to move through the text. Once you've reviewed the license, type `yes` to agree to the terms.
 
-The installer will prompt you for the location of the installation. You can press `ENTER` to accept the default location or specify a different location.
+The installer will prompt you for the location of the installation. As there is very limited space in your home directory (e.g., /home/jmif9945/) installing Anaconda here isn't a great idea. Instead install it in your main project home directory by specifying the path:
+For example:
+`/project/jcomvirome/anaconda3`
+You can press `ENTER` to accept.
 
 At the end of the installation, you'll be asked if you want to run conda init. We recommend saying `yes` to this option. This will make Anaconda usable from any terminal session.
 
