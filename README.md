@@ -1,7 +1,7 @@
 ## Installation
 
 A repo containing tools and shortcuts for virus discovery workflows on Artemis with a particular focus on SRA mining.
-If you run into any problems please open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress!
+If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress!
 
 
 Download the BatchArtemisSRAMiner package:
