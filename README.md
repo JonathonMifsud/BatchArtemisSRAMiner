@@ -133,7 +133,7 @@ Conda will sometimes require more memory than the head node can provide causing 
 To create the environments:
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/ccmetagen_env.yml`
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/project_pipeline.yml`
-`conda env create -f /project/VELAB/jcom_pipeline_taxonomyr_env.yml`
+`conda env create -f /project/VELAB/jcom_pipeline_taxonomy/r_env.yml`
 
 
 ### Storage:
