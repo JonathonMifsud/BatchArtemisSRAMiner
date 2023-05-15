@@ -111,8 +111,8 @@ The main thing is that underscores are only used to seperate the ID (hpv3t10) an
 Conda is a package manager that can be used to install packages that aren't readily available through the module. This is necessary because Artemis lacks some required modules/module versions. The primary use cases here are CCmetagen and the summary table script.
 
 Download the Anaconda installer script from the Anaconda distribution site. You can use the wget command to download it.
-`wget https://repo.anaconda.com/archive/Anaconda3-2023.03-1-Linux-x86_64.sh`
-`bash Anaconda3-2023.03-1-Linux-x86_64.sh`
+`wget https://repo.anaconda.com/archive/Anaconda3-4.3.0-Linux-x86_64.sh`
+`bash Anaconda3-4.3.0-Linux-x86_64.sh`
 
 
 Press ENTER to continue and review the license agreement. Press `ENTER` again to move through the text. Once you've reviewed the license, type `yes` to agree to the terms.
@@ -126,6 +126,9 @@ At the end of the installation, you'll be asked if you want to run conda init. W
 
 Activate Installation
 Close and re-open your terminal. You should now have access to the conda command.
+
+Errors during conda installation:
+
 
 To create the environments:
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/ccmetagen_env.yml`
