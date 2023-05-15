@@ -22,6 +22,20 @@ function condaSetUp(){
     conda activate project_pipeline
 }
 
+check_and_install_R_packages() {
+    # Create a temporary directory in the current directory
+    TMPDIR=$(mktemp -d -p "$(pwd)")
+
+    for PACKAGE_NAME in "$@"
+    do
+        echo "Checking package ${PACKAGE_NAME}"
+        TMPDIR=$TMPDIR R -e 'if (!("'"${PACKAGE_NAME}"'" %in% installed.packages())) {print("Installing"); install.packages("'"${PACKAGE_NAME}"'", repos="https://cloud.r-project.org/", dependencies = TRUE, INSTALL_opts = "--no-lock")} else {print("Already installed")}'
+    done
+
+    # Remove the temporary directory
+    rm -rf "$TMPDIR"
+}
+
 function createSummaryTable(){
     mkdir -p "$wd"/blast_results/summary_table_creation/
 
@@ -57,54 +71,6 @@ function createSummaryTable(){
     cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt
     rm "$wd"/blast_results/*_anno_RVDB_blastx_results.txt
     
-    ## Do the same for the Nr RdRp blast results for each library
-    #echo "Number of NR RDRP Blast files loaded: " $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt | wc -l)
-    #for i in $(ls "$wd"/blast_results/*_rdrp_nr_blastx_results.txt); do
-    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_rdrp_nr_blastx_results.txt"); print a[1]}')
-    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_rdrp_nr_blastx_results.txt
-    #done
-
-    #cat "$wd"/blast_results/*_rdrp_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_nr_blastx_results.txt
-    #rm "$wd"/blast_results/*_anno_rdrp_nr_blastx_results.txt
-
-    ## Do the same for the Nr RVDB blast results for each library
-    #echo "Number of NR RVDB Blast files loaded: " $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt | wc -l)
-    #for i in $(ls "$wd"/blast_results/*_RVDB_nr_blastx_results.txt); do
-    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RVDB_nr_blastx_results.txt"); print a[1]}')
-    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_RVDB_nr_blastx_results.txt
-    #done
-
-    #cat "$wd"/blast_results/*_RVDB_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_nr_blastx_results.txt
-    #rm "$wd"/blast_results/*_anno_RVDB_nr_blastx_results.txt
-    
-    ## Do the same for the Nt Rdrp blast results for each library
-    #echo "Number of NT RDRP Blast files loaded: " $(ls "$wd"/blast_results/*_rdrp_blastx_results.txt | wc -l)
-    #for i in $(ls "$wd"/blast_results/*rdrp_nt_blastn_results.txt); do
-    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_rdrp_nt_blastn_results.txt"); print a[1]}')
-    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_rdrp_nt_blastn_results.txt
-    #done
-
-    #cat "$wd"/blast_results/*_rdrp_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_nt_blastn_results.txt
-    #rm "$wd"/blast_results/*_anno_rdrp_nt_blastn_results.txt
-
-    ### Do the same for the Nt RVDB blast results for each library
-    #echo "Number of NT RVDB Blast files loaded: " $(ls "$wd"/blast_results/*_RVDB_blastx_results.txt | wc -l)
-    #for i in $(ls "$wd"/blast_results/*RVDB_nt_blastn_results.txt); do
-    #    id=$(echo "$i" | xargs basename | awk '{split($0,a,"_RVDB_nt_blastn_results.txt"); print a[1]}')
-    #    awk -F'\t' -vOFS='\t' '{ $1 = $1 "_"id }1' id="$id" $i > "$wd"/blast_results/"$id"_anno_RVDB_nt_blastn_results.txt
-    #done
-
-   # cat "$wd"/blast_results/*_RVDB_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_nt_blastn_results.txt
-    #rm "$wd"/blast_results/*_anno_RVDB_nt_blastn_results.txt
-
-    # combine the two rdrp and rvdb verisons of each nt and nr blast
-    #cat "$wd"/blast_results/summary_table_creation/combined_RVDB_nt_blastn_results.txt > "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt
-    #cat "$wd"/blast_results/summary_table_creation/combined_rdrp_nt_blastn_results.txt >> "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt
-
-    #cat "$wd"/blast_results/summary_table_creation/combined_rdrp_nr_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt
-    #cat "$wd"/blast_results/summary_table_creation/combined_RVDB_nr_blastx_results.txt >> "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt
-
-
     # lets also make a combined virus contig file in "$wd"/blast_results/summary_table_creation/ so that we can more easily extract contigs at a later stage
     cat "$wd"/blast_results/*_rdrp_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta
     cat "$wd"/blast_results/*_RVDB_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta
@@ -114,6 +80,8 @@ function createSummaryTable(){
 
     conda deactivate
     conda activate r_env
+
+    check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr"
 
     # from all the blast results files create a joint table which we will filter in a later step
     "$pathtoRscript"/Rscript "$scripts"/$project_create_blast_joint_table.R --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
@@ -133,6 +101,9 @@ function createSummaryTable(){
     taxonkit lineage "$wd"/blast_results/summary_table_creation/temp_joint_blast_table_taxids \
     | taxonkit reformat -I 1 -r "Unassigned" --fill-miss-rank -f "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}" \
     | csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" > "$wd"/blast_results/summary_table_creation/temp_lineage_table
+
+    conda deactivate
+    conda activate r_env
 
     "$pathtoRscript"/Rscript "$scripts"/$project_filter_blast_table.R --blast_table "$wd"/blast_results/summary_table_creation/temp_joint_blast_table \
         --taxnomy_table "$wd"/blast_results/summary_table_creation/temp_lineage_table \
