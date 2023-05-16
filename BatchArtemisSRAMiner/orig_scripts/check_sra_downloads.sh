@@ -40,17 +40,8 @@ while getopts "d:f:" 'OPTKEY'; do
     exit 1
     fi
 
-
-
 # Get a list of all of the SRA ids in the current directory
 ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1  | cut -d'.' -f1 | sort | uniq > "$directory"/sra_ids.txt
-
-# Check for temp_SRR..._file and generate a warning if found.
-for file in "$directory"/*; do
-    if [[ $file =~ temp_SRR.*_file ]]; then
-        echo -e "\e[33m""Warning: temp file $file detected. This may indicate that the download for the corresponding SRA id failed. Check that both read files are of similar size and non-empty"
-    fi
-done
 
 # if missing_sra_ids.txt exists already, remove it
 if [ -f "$directory"/missing_sra_ids.txt ]; then
@@ -110,6 +101,9 @@ grep -Fxvf "$directory"/cleanup_sra_ids.txt  "$file_of_accessions" >> "$director
 awk '!a[$0]++' "$directory"/missing_sra_ids.txt > "$directory"/missing_sra_ids.txt.tmp && mv "$directory"/missing_sra_ids.txt.tmp "$directory"/missing_sra_ids.txt
 
 
+# Reset the color without outputting anything
+reset_color="\e[0m"
+
 # If the number of lines in the missing_sra_ids.txt file is 0, then all of the SRA ids were downloaded
 # If it is not 0, then some of the SRA ids were not downloaded
 # Check the number of lines in the file
@@ -140,18 +134,30 @@ else
     grep . "$directory"/missing_sra_ids.txt
     echo -e "\nmissing_sra_ids.txt has been created in the -d directory and contains the missing SRA ids\n"
     echo -e "\nTry redownloading them using the missing_sra_ids.txt file as the -f input"
+    echo -e "${reset_color}"
 
     # Check for temp_SRR..._file and generate a warning if found.
+    temp_files=()
     for file in "$directory"/*; do
         if [[ $file =~ temp_SRR.*_file ]]; then
-            echo -e "\e[33m""Warning: Temporary file $file detected. This might be a symptom of a failed download for the related SRA id. We advise you to verify that both read files are non-empty and of comparable size."
+            # Remove path and unwanted parts from the filename
+            temp_file=${file##*/}       # Remove path
+            temp_file=${temp_file#temp_}   # Remove 'temp_' prefix
+            temp_file=${temp_file%_file}   # Remove '_file' suffix
+            temp_files+=("$temp_file")
         fi
     done
+
+    if [ ${#temp_files[@]} -ne 0 ]; then
+        echo -e "\e[33m""Warning: Temporary files detected. These might be a symptom of failed downloads for the related SRA ids. We advise you to verify that both read files are non-empty and of comparable size for the following ids:"
+        for temp_file in "${temp_files[@]}"; do
+            echo "$temp_file"
+        done
+
+         echo -e "\e[33m""If files are parital, remove them and rerun this script to get an updated missing_sra_ids.txt file which can be used as input for redownloading."
+        echo -e "${reset_color}"
+    fi
 fi
-
-# Set the colour back to normal
-echo -e "\e[39m"
-
 
 # Clean up
 rm "$directory"/sra_ids.txt
