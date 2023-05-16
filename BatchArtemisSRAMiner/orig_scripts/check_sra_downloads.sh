@@ -45,6 +45,12 @@ while getopts "d:f:" 'OPTKEY'; do
 # Get a list of all of the SRA ids in the current directory
 ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1  | cut -d'.' -f1 | sort | uniq > "$directory"/sra_ids.txt
 
+# Check for temp_SRR..._file and generate a warning if found.
+for file in "$directory"/*; do
+    if [[ $file =~ temp_SRR.*_file ]]; then
+        echo -e "\e[33m""Warning: temp file $file detected. This may indicate that the download for the corresponding SRA id failed. Check that both read files are of similar size and non-empty"
+    fi
+done
 
 # if missing_sra_ids.txt exists already, remove it
 if [ -f "$directory"/missing_sra_ids.txt ]; then
@@ -53,41 +59,41 @@ fi
 
 # For each SRA id, check if the fastq files exist
 for i in $(cat "$directory"/sra_ids.txt); do
-    if [ -f "$directory"/"$library_id"".fastq.gz" ] && [ ! -f "$directory"/"$library_id""_1.fastq.gz" ]; then #e.g. if SRR1249328.fastq.gz exists and SRR1249328_1.fastq.gz doesn't layout == single
+    if [ -f "$directory"/"$i"".fastq.gz" ] && [ ! -f "$directory"/"$i""_1.fastq.gz" ]; then #e.g. if SRR1249328.fastq.gz exists and SRR1249328_1.fastq.gz doesn't layout == single
         export layout="single"
     fi
 
-    if [ ! -f "$directory"/"$library_id"".fastq.gz" ] && [ -f "$directory"/"$library_id""_1.fastq.gz" ]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
+    if [ ! -f "$directory"/"$i"".fastq.gz" ] && [ -f "$directory"/"$i""_1.fastq.gz" ]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
         export layout="paired"
     fi
 
-    if [ -f "$directory"/"$library_id"".fastq.gz" ] && [ -f "$directory"/"$library_id""_1.fastq.gz" ]; then #e.g. in the case both single and paired read files exist try to assemble using paired files, layout == paired
+    if [ -f "$directory"/"$i"".fastq.gz" ] && [ -f "$directory"/"$i""_1.fastq.gz" ]; then #e.g. in the case both single and paired read files exist try to assemble using paired files, layout == paired
         export layout="triple"
     fi
 
     # If layout is triple, remove the single file, and set layout to paired
     # From what I understand the third file is techinal reads and not biological and these are not useful
     if [ "$layout" = "triple" ]; then
-        rm "$directory"/"$library_id"".fastq.gz"
+        rm "$directory"/"$i"".fastq.gz"
         export layout="paired"
     fi
 
     # If layout is paired, check if the second file exists
     if [ "$layout" = "paired" ]; then
-        if [ ! -f "$directory"/"$library_id""_2.fastq.gz" ]; then
+        if [ ! -f "$directory"/"$i""_2.fastq.gz" ]; then
             # If it does not exist, remove the first file
-            rm "$directory"/"$library_id""_1.fastq.gz"
+            rm "$directory"/"$i""_1.fastq.gz"
             # And add the SRA id to a file containing the missing SRA ids
-            echo "$library_id" >> "$directory"/missing_sra_ids.txt
+            echo "$i" >> "$directory"/missing_sra_ids.txt
         fi
     fi
 
     # If layout is single, check if the file exists
     # This should be redundant as the sra list is based on the inital ls but I am leaving it in for now
     if [ "$layout" = "single" ]; then
-        if [ ! -f "$directory"/"$library_id"".fastq.gz" ]; then
+        if [ ! -f "$directory"/"$i"".fastq.gz" ]; then
             # If it does not exist, add the SRA id to a file containing the missing SRA ids
-            echo "$library_id" >> "$directory"/missing_sra_ids.txt
+            echo "$i" >> "$directory"/missing_sra_ids.txt
         fi
     fi
 done 
@@ -107,22 +113,45 @@ awk '!a[$0]++' "$directory"/missing_sra_ids.txt > "$directory"/missing_sra_ids.t
 # If the number of lines in the missing_sra_ids.txt file is 0, then all of the SRA ids were downloaded
 # If it is not 0, then some of the SRA ids were not downloaded
 # Check the number of lines in the file
-if [ $(wc -l < "$directory"/missing_sra_ids.txt) -eq 0 ]; then
-    echo -e "\e[32m""It's a Christmas miracle, all of the SRA ids were downloaded!"
+# If the number of lines in the missing_sra_ids.txt file (ignoring empty lines) is 0, then all of the SRA ids were downloaded
+# If it is not 0, then some of the SRA ids were not downloaded
+# Check the number of lines in the file
+if [ $(grep -c . "$directory"/missing_sra_ids.txt) -eq 0 ]; then
+    str="It's a Christmas miracle, all of the SRA ids were downloaded!"
+    color1="\e[31m" # Red
+    color2="\e[32m" # Green
+    new_str=""
+    for (( i=0; i<${#str}; i++ )); do
+        if ((i % 2 == 0)); then
+            new_str+="${color1}${str:$i:1}"
+        else
+            new_str+="${color2}${str:$i:1}"
+        fi
+    done
+    new_str+="\e[39m" # Reset color
+    echo -e $new_str
 else
     # Output the number of missing SRA ids
     # Change colour to red because we are fancy
     echo -e "\e[31m""Some of the SRA ids were not downloaded or partially downloaded\n"
     echo -e "\e[31m""Number of missing SRA ids:"
-    wc -l "$directory"/missing_sra_ids.txt
+    grep . "$directory"/missing_sra_ids.txt | wc -l
     echo -e "\e[31m""\nThey are the following:\n"
-    cat "$directory"/missing_sra_ids.txt
+    grep . "$directory"/missing_sra_ids.txt
     echo -e "\nmissing_sra_ids.txt has been created in the -d directory and contains the missing SRA ids\n"
     echo -e "\nTry redownloading them using the missing_sra_ids.txt file as the -f input"
+
+    # Check for temp_SRR..._file and generate a warning if found.
+    for file in "$directory"/*; do
+        if [[ $file =~ temp_SRR.*_file ]]; then
+            echo -e "\e[33m""Warning: Temporary file $file detected. This might be a symptom of a failed download for the related SRA id. We advise you to verify that both read files are non-empty and of comparable size."
+        fi
+    done
 fi
 
 # Set the colour back to normal
 echo -e "\e[39m"
+
 
 # Clean up
 rm "$directory"/sra_ids.txt
