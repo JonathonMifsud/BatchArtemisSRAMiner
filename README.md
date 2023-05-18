@@ -14,6 +14,9 @@ Download the BatchArtemisSRAMiner package:
 6. Run the setup script `./setup.sh`
 7. `cd ../../../` and remove the install files `rm BatchArtemisSRAMiner-main BatchArtemisSRAMiner-main.zip`
 
+Downloading requires ascp (Aspera)
+- ADD INSTALL GUIDE ----
+
 Optional:
 Add the commands to your path
 `nano ~/.bashrc`
