@@ -48,7 +48,7 @@ readTrimmomatic() {
             ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25
     fi
     if [[ "$layout" == "paired" ]]; then
-        cp /project/VELAB/adapters/oint_TruSeq3_Nextera-PE.fa ./
+        cp /project/VELAB/adapters/joint_TruSeq3_Nextera-PE.fa ./
         echo -e "MEGAHIT_SCRIPT: READ TRIMMOMATIC PAIRED - READ QC"
         trimmomatic PE \
             -threads "$CPU" \
