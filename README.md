@@ -47,8 +47,9 @@ The reason I do this is that it is expensive to run NT / NR blasts for each cont
 E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 8. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
 9. Create an input accession file containing `combined`
-10. Run blastnr and blastnt using this input file. 
-11. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. 
+10. Run the readcount script
+11. Run blastnr and blastnt using this input file. 
+12. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
 
