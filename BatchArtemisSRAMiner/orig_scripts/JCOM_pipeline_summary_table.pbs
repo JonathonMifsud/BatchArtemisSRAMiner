@@ -129,7 +129,7 @@ function createTaxaFolderStructure(){
     #rm "$wd"/blast_results/summary_table_creation/dirs.txt
 }
 
-function createTaxaViruContigFiles(){
+function createTaxaVirusContigFiles(){
     # requires createTaxaFolderStructure to be run
     summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
     for i in $(cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv); do
@@ -160,5 +160,5 @@ createTaxaViruContigFiles
 input_table="$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_potential_viruses.csv
 extractContigsFromSummaryTable
 createTaxaFolderStructure
-createTaxaViruContigFiles
+createTaxaVirusContigFiles
 zip -r "$wd"/blast_results/summary_table_creation/virus_fasta_files.zip "$wd"/blast_results/summary_table_creation/virus_fasta_files

@@ -51,7 +51,6 @@ outpath=/project/"$root_project"/"$project"/blast_results        # location of m
 tempdir=/scratch/"$root_project"/
 CPU=12
 MEM=1       
-db=/scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd
 
 # cd working dir
 cd "$wd" || exit

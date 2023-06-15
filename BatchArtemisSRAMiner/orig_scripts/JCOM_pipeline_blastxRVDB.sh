@@ -92,6 +92,12 @@ fi
             queue_project="$root_project"
     fi
 
+     if [ "$db" = "" ]
+        then
+            echo "No database specified. Use -d option to specify the database, e.g, -d /scratch/VELAB/Databases/Blast/U-RVDBv22.0-prot-exo_curated.dmnd"
+            exit 1
+    fi
+
           if [ "$queue" = "alloc-eh" ]
         then 
             job_time="walltime=84:00:00"
@@ -101,7 +107,7 @@ fi
 qsub -J $jPhrase \
     -o "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
     -e "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
-    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
+    -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,db=$db" \
     -q "$queue" \
     -l "$job_time" \
     -P "$queue_project" \
