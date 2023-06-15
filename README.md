@@ -141,5 +141,5 @@ To create the environments:
 
 
 ### Storage:
-I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
+I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
 
