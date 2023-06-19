@@ -11,11 +11,11 @@
 ##load modules
 module load blast+
 
-nt_db_basename=$(basename "$nt_db")
+nt_db_basename=$(basename "$db")
 
 # blastn
 function Blastn {
-    blastn -query "$input" -db "$nt_db" -out "$outpath"/"$library_id"_"$nt_db_basename"_nt_blastn_results.txt -max_target_seqs 10 -num_threads "$CPU" -mt_mode 0 -evalue 1E-4 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
+    blastn -query "$input" -db "$db" -out "$outpath"/"$library_id"_"$nt_db_basename"_nt_blastn_results.txt -max_target_seqs 10 -num_threads "$CPU" -mt_mode 0 -evalue 1E-4 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
 }
 
 #tool to extract contigs from assembly Blast to fasta
@@ -36,7 +36,6 @@ wd="$wd"
 outpath="$wd"
 CPU=6
 MEM=2
-nt_db="$db"
 
 cd "$wd" || exit
 

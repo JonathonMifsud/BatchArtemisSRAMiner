@@ -39,7 +39,7 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
                 ;;
             'd')
                 #
-                database="$OPTARG"
+                db="$OPTARG"
                 ;; 
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
@@ -65,9 +65,9 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
     exit 1
     fi
 
-    if [ "$database" = "" ]
+    if [ "$db" = "" ]
         then
-            echo "No database specified. Use -d /scratch/VELAB/Databases/Blast/nt.Mar-2023/nt"
+            echo "No database specified. Use e.g., -d /scratch/VELAB/Databases/Blast/nt.Jul-2023/nt"
     exit 1
     fi
     
@@ -95,26 +95,6 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
             blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
     fi
 
-    if [ "$queue" = "scavenger" ]
-        then 
-            job_time="walltime=48:00:00"
-            queue_project="$root_project"
-            cpu="ncpus=12"
-            mem="mem=120GB"
-            blast_cpu="12"
-            blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
-    fi
-
-    if [ "$queue" = "alloc-eh" ]
-        then 
-            job_time="walltime=180:00:00"
-            queue_project="VELAB"
-            cpu="ncpus=24"
-            mem="mem=120GB"
-            blast_cpu="24"
-            blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
-    fi
-
     if [ "$queue" = "intensive" ]
         then 
             job_time="walltime=124:00:00"
@@ -124,18 +104,6 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
             mem="mem=220GB"
             blast_cpu="24"
             blast_mem="8"
-            blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
-    fi
-
-
-    if [ "$queue" = "intensive_alloc-eh" ]
-        then 
-            job_time="walltime=180:00:00"
-            queue_project="VELAB"
-            queue="alloc-eh"
-            cpu="ncpus=24"
-            mem="mem=220GB"
-            blast_cpu="24"
             blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
     fi
 

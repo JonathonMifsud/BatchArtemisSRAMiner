@@ -86,33 +86,11 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
         then 
             job_time="walltime=48:00:00"
             queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
-            cpu="ncpus=12"
-            mem="mem=120GB"
-            diamond_cpu="12"
+            cpu="ncpus=24"
+            mem="mem=220GB"
+            diamond_cpu="20"
             diamond_mem="4"
             diamond_para="-e 1E-4 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k10 --tmpdir /scratch/$root_project/"
-    fi
-
-    if [ "$queue" = "scavenger" ]
-        then 
-            job_time="walltime=48:00:00"
-            queue_project="$root_project"
-            cpu="ncpus=12"
-            mem="mem=120GB"
-            diamond_cpu="12"
-            diamond_mem="4"
-            diamond_para="-e 1E-4 -c2 -b $diamond_mem -p $diamond_cpu --more-sensitive -k10 --tmpdir /scratch/$root_project/"
-    fi
-
-    if [ "$queue" = "alloc-eh" ]
-        then 
-            job_time="walltime=200:00:00"
-            queue_project="VELAB"
-            cpu="ncpus=24"
-            mem="mem=120GB"
-            diamond_cpu="24"
-            diamond_mem="4"
-            diamond_para="-e 1E-5 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k10 --tmpdir /scratch/$root_project/"
     fi
 
     if [ "$queue" = "intensive" ]
@@ -120,19 +98,6 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
             job_time="walltime=124:00:00"
             queue_project="VELAB"
             queue="defaultQ"
-            cpu="ncpus=24"
-            mem="mem=220GB"
-            diamond_cpu="24"
-            diamond_mem="8"
-            diamond_para="-e 1E-4 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k5 --tmpdir /scratch/$root_project/"
-    fi
-
-
-    if [ "$queue" = "intensive_alloc-eh" ]
-        then 
-            job_time="walltime=180:00:00"
-            queue_project="VELAB"
-            queue="alloc-eh"
             cpu="ncpus=24"
             mem="mem=220GB"
             diamond_cpu="24"

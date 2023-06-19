@@ -109,12 +109,15 @@ filterBlastTable <- function(blast_table, taxnomy_table_summarised){
       (is.na(rdrp_kingdom) & rvdb_kingdom == "Viruses" & (is.na(nr_kingdom) & is.na(nt_kingdom))) ~ "Potential-Viruses",
       # When RdRp is na but everything else is virus
       (is.na(rdrp_kingdom) & rvdb_kingdom == "Viruses" & nr_kingdom == "Viruses" & nt_kingdom == "Viruses") ~ "Viruses",
+      # alot of the false positive are these recurrent bacterium with no taxid link this should take care of most of them.
+      ((rdrp_kingdom == "Viruses" | is.na(rdrp_kingdom)) & (rvdb_kingdom == "Viruses" | is.na(rvdb_kingdom)) & is.na(nr_kingdom) & is.na(nt_kingdom) & str_detect(nr_desc, "bacterium")) ~ "Non-Viral",
       # is NR is na we need to be careful about trusting the contig
       ((rdrp_kingdom == "Viruses" & is.na(nr_kingdom)) & (rvdb_kingdom == "Viruses" | is.na(rvdb_kingdom)) & (nt_kingdom == "Viruses" | is.na(nt_kingdom))) ~ "Potential-Viruses",
       # When both reference databases are non-viral = not viral
       ((rdrp_kingdom == "Viruses" | is.na(rdrp_kingdom)) & (rvdb_kingdom == "Viruses" | is.na(rvdb_kingdom)) & nr_kingdom == "Non-Viral" & nt_kingdom == "Non-Viral") ~ "Non-Viral",
       # When one reference database is non-viral and the other is missing = not viral
       ((rdrp_kingdom == "Viruses" | is.na(rdrp_kingdom)) & (rvdb_kingdom == "Viruses" | is.na(rvdb_kingdom)) & ((nr_kingdom == "Non-Viral" & is.na(nt_kingdom)) | (is.na(nr_kingdom) & nt_kingdom == "Non-Viral"))) ~ "Non-Viral"))
+
   
   likely_viruses <- classfied_blast_table %>% 
     filter(collective_classiciation == "Viruses") %>% 

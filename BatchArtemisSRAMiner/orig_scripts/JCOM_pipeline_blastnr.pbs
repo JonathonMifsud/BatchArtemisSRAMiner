@@ -12,6 +12,9 @@
 # It will then extract the contigs that have a blast hit to the nr database
 
 # I tend to run this once per project on a single file containing all the contigs concatenated together resulting from the Rdrp and RVDB blasts (i.e. the blastcontig.fa files in blast_results/)
+#PBS -N blastnr_array
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
 
 ##load modules
 module load blast+

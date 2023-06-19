@@ -49,7 +49,7 @@ while getopts "i:d:p:r:" 'OPTKEY'; do
 
     if [ "$db" = "" ]
         then
-            echo "No database specified. Use -d option to specify the database."
+            echo "No database specified. Use -d option to specify the database. e.g., -d /scratch/VELAB/Databases/Blast/nt.Jul-2023/nt"
             exit 1
     fi
 

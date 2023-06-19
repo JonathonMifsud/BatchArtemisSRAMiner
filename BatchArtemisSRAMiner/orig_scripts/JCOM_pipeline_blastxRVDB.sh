@@ -17,7 +17,7 @@ project="JCOM_pipeline_virome"
 root_project="jcomvirome"
 
 
-while getopts "p:f:q:r:" 'OPTKEY'; do
+while getopts "p:f:q:r:d:" 'OPTKEY'; do
     case "$OPTKEY" in
             'p')
                 # 
@@ -34,7 +34,11 @@ while getopts "p:f:q:r:" 'OPTKEY'; do
             'r')
                 #
                 root_project="$OPTARG"
-                ;;                             
+                ;;     
+            'd')
+                #
+                db="$OPTARG"
+                ;;                        
             '?')
                 echo "INVALID OPTION -- ${OPTARG}" >&2
                 exit 1
@@ -86,27 +90,15 @@ fi
             queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
     fi
 
-      if [ "$queue" = "scavenger" ]
-        then 
-            job_time="walltime=48:00:00"
-            queue_project="$root_project"
-    fi
-
      if [ "$db" = "" ]
         then
-            echo "No database specified. Use -d option to specify the database, e.g, -d /scratch/VELAB/Databases/Blast/U-RVDBv22.0-prot-exo_curated.dmnd"
+            echo "No database specified. Use -d option to specify the database, e.g, -d /scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd"
             exit 1
     fi
 
-          if [ "$queue" = "alloc-eh" ]
-        then 
-            job_time="walltime=84:00:00"
-            queue_project="VELAB"
-    fi
-
 qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+    -o "/project/$root_project/$project/logs/blastxRVDB_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastxRVDB_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,db=$db" \
     -q "$queue" \
     -l "$job_time" \
