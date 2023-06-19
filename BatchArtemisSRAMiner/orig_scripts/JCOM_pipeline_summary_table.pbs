@@ -150,7 +150,7 @@ function createSummaryTable() {
     # Check if the files exist in the summary_table_creation folder, otherwise copy from the parent blast_results folder
     if [ ! -f "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt ] || [ ! -f "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt ]; then
         if [ -f "$wd"/blast_results/combined_nr_blastx_results.txt ] && [ -f "$wd"/blast_results/combined_nt_blastn_results.txt ]; then
-            echo "Found combined_nr_blastx_results.txt and combined_nt_blastn_results.txt in blast_results folder."
+            echo "Found combined_nr_blastx_results.txt aqstat nd combined_nt_blastn_results.txt in blast_results folder."
             # Copy the files to the summary_table_creation folder
             cp "$wd"/blast_results/combined_nr_blastx_results.txt "$wd"/blast_results/summary_table_creation/
             cp "$wd"/blast_results/combined_nt_blastn_results.txt "$wd"/blast_results/summary_table_creation/
@@ -266,7 +266,7 @@ function createSummaryTable() {
 
     # Create the joint blast table
     echo "Creating joint blast table..."
-    "$pathtoRscript"/Rscript "$scripts"/"$project2"_create_blast_joint_table.R \
+    "$pathtoRscript"/Rscript "$scripts"/"$project"_create_blast_joint_table.R \
         --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
         --nt "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt \
         --rdrp "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt \
@@ -308,7 +308,7 @@ function createSummaryTable() {
 
     # Filter blast table
     echo "Filtering blast table..."
-    "$pathtoRscript"/Rscript "$scripts"/"$project2"_filter_blast_table.R \
+    "$pathtoRscript"/Rscript "$scripts"/"$project"_filter_blast_table.R \
         --blast_table "$wd"/blast_results/summary_table_creation/temp_joint_blast_table \
         --taxnomy_table "$wd"/blast_results/summary_table_creation/temp_lineage_table \
         --output "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')
@@ -381,7 +381,6 @@ scripts="/project/$root_project/$project/scripts/"
 abundance="/scratch/$root_project/$project/abundance/final_abundance"
 taxonomy="/project/VELAB/jcom_pipeline_taxonomy"
 pathtoRscript="/project/$root_project/anaconda3/envs/r_env/lib/R/bin/"
-project2="JCOM_pipeline" #REMOVE ME!!!!!! and change in text
 
 condaSetUp && checkStatus
 check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" && checkStatus
