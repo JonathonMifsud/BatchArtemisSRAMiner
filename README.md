@@ -1,6 +1,6 @@
 ## Installation
 
-A repo containing tools and shortcuts for virus discovery workflows on Artemis with a particular focus on SRA mining.
+A repo containing tools and shortcuts for virus discovery workflows on the USYD HPC Artemis with a particular focus on SRA mining.
 If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress so please let me know if I should add anything!
 
 
