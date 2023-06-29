@@ -48,7 +48,7 @@ E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 8. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
 9. Create an input accession file containing `combined`
 10. Run the readcount script
-11. Run blastnr and blastnt using this input file. 
+11. Run blastnr and blastnt using this input file. As you are running this on the combined contigs there should only be one subjob in the array!
 12. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
