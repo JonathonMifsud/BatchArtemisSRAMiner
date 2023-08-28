@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   #
 #                                                   2023                                                      #
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # Set the default values

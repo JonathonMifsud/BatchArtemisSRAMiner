@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # A function to check if the dir contains all of the sras specified in the file_of_accessions

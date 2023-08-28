@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # shell wrapper script to run read count getter for project folder. Note this is run in trim_assembly_assemble script by default 

@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # Underlying pbs script that is run using the wrapper script YOURPROJECT_download_sra.sh

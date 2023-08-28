@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # shell wrapper script to run blastx against the RdRp database

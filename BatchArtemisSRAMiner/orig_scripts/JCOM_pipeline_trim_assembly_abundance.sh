@@ -4,7 +4,6 @@
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
 #                                                                                                             #
-#                                 please ask before sharing these scripts :)                                  #
 ###############################################################################################################
 
 # This script will trim and assemble reads using trimmomatic and megahit and then quantify abundance using RSEM
