@@ -1,7 +1,7 @@
 ## Installation
 
 A repo containing tools and shortcuts for virus discovery workflows on the USYD HPC Artemis with a particular focus on SRA mining.
-If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Documentation is a work in progress so please let me know if I should add anything!
+If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Code is a little janky and documentation is a work in progress so please let me know if I should add anything!
 
 
 Download the BatchArtemisSRAMiner package:
@@ -50,6 +50,8 @@ E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 10. Run blastnr and blastnt using this input file. As you are running this on the combined contigs there should only be one subjob in the array!
 11. Run the readcount script
 12. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
+
+NOTE: This pipeline relies on several databases and taxonomy files that are avaiable on the USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me and email.
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
 
