@@ -3,7 +3,7 @@
 A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining.
 If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Code is a little janky and documentation is a work in progress so please let me know if I should add anything!
 
-NOTE: This pipeline relies on several databases and taxonomy files that are avaiable on the USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me and email.
+NOTE: This pipeline relies on several databases, modules and taxonomy files that are available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me and email.
 
 Download the BatchArtemisSRAMiner package:
 
