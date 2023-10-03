@@ -91,7 +91,7 @@ fi
 
      if [ "$db" = "" ]
         then
-            echo "No database specified. Use -d option to specify the database, e.g, -d /scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd"
+            echo "No database specified. Use -d option to specify the database, please check the databse folder for newer verisons but for e.g, -d /scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd"
             exit 1
     fi
 

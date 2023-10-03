@@ -120,27 +120,27 @@ function createSummaryTable() {
     echo "Number of RdRp Blast files loaded: ${#rdrp_blast_files[@]}" # Count the number of RdRp blast files
     for i in "${rdrp_blast_files[@]}"; do
         id=$(basename "$i" | awk '{split($0,a,"_rdrp_blastx_results.txt"); print a[1]}') # Extract the ID from the file name
-        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" >"$wd"/blast_results/"$id"_anno_rdrp_blastx_results.txt # Add the library name to the contig name in the RdRp blast file
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" > "$wd"/blast_results/"$id"_anno_rdrp_blastx_results.txt # Add the library name to the contig name in the RdRp blast file
     done
 
-    cat "$wd"/blast_results/*_anno_rdrp_blastx_results.txt >"$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt # Concatenate all RdRp blast files into one file
+    cat "$wd"/blast_results/*_anno_rdrp_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt # Concatenate all RdRp blast files into one file
     rm "$wd"/blast_results/*_anno_rdrp_blastx_results.txt # Remove the individual RdRp blast files
 
     # Do the same for the RVDB blast results for each library
     echo "Number of RVDB Blast files loaded: ${#rvdb_blast_files[@]}" # Count the number of RVDB blast files
     for i in "${rvdb_blast_files[@]}"; do
         id=$(basename "$i" | awk '{split($0,a,"_RVDB_blastx_results.txt"); print a[1]}') # Extract the ID from the file name
-        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" >"$wd"/blast_results/"$id"_anno_RVDB_blastx_results.txt # Add the library name to the contig name in the RVDB blast file
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" > "$wd"/blast_results/"$id"_anno_RVDB_blastx_results.txt # Add the library name to the contig name in the RVDB blast file
     done
 
-    cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt >"$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt # Concatenate all RVDB blast files into one file
+    cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt # Concatenate all RVDB blast files into one file
     rm "$wd"/blast_results/*_anno_RVDB_blastx_results.txt # Remove the individual RVDB blast files
 
     # Create a combined virus contig file in "$wd"/blast_results/summary_table_creation/ so that we can more easily extract contigs at a later stage
     cat "${rdrp_blastcontigs_file[@]}" > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta # Concatenate all RdRp blast contig files into one file
-    cat "${rvdb_blastcontigs_file[@]}" >"$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta # Concatenate all RVDB blast contig files into one file
-    cat "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta >"$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Create a combined contig file by copying the RdRp blast contig file
-    cat "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta >>"$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Append the RVDB blast contig file to the combined contig file
+    cat "${rvdb_blastcontigs_file[@]}" > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta # Concatenate all RVDB blast contig files into one file
+    cat "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Create a combined contig file by copying the RdRp blast contig file
+    cat "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta >> "$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Append the RVDB blast contig file to the combined contig file
     rm "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta # Remove the individual blast contig files
 
     conda deactivate
@@ -263,8 +263,80 @@ function createSummaryTable() {
         echo "File of accessions not provided or does not exist. Skipping filtering."
     fi
 
+    # Function to process RVDB taxa information
+    process_rvdb_taxa_information() {
+        # Input file containing RVDB blast results
+        input_file="$1"
+
+        # Step 1: Extract unique taxids from the blast results
+        cut -f3 "$input_file" | cut -f3 -d"|" | sort -u > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids
+        grep -Ff "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids "$rvdb_accession2taxid" > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered
+
+        # Step 2: Parse header information and split it into columns
+        cut -f4 "$input_file" | sort -u > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers
+
+        # Step 3: Process and format the RVDB blast results
+        awk -F '|' '{
+
+            source=$2        # Store the 2nd column in the 'source' variable
+            protein_accession=$3  # Store the 3rd column in the 'protein_accession' variable
+            source2=$4      # Store the 4th column in the 'source2' variable
+            nucl_accession=$5   # Store the 5th column in the 'nucl_accession' variable
+            genomic_region=$6   # Store the 6th column in the 'genomic_region' variable
+
+            # Extract organism from genomic_region using gensub
+            organism=gensub(/.*\[|\].*/, "", "g", genomic_region)
+
+            # Remove the organism from genomic_region using gsub
+            gsub(/\[.*\]/, "", genomic_region)
+
+            # Remove leading and trailing whitespace from genomic_region
+            gsub(/^[ \t]+|[ \t]+$/, "", genomic_region)
+
+            # Replace 'old_string' with 'new_string' in the original row ($0)
+            gsub("\\|", "%", $0)
+
+            # Print the modified original row followed by other columns
+            print $0 "|" source "|" protein_accession "|" source2 "|" nucl_accession "|" genomic_region "|" organism
+        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers > temp_joint_RVDB_blast_table_headers_parsed
+
+    # Function to join two tables based on the second column
+    join_tables() {
+        # Check if both input files exist
+        if [ ! -f "$1" ] || [ ! -f "$2" ]; then
+            echo "Input files not found."
+            return 1
+        fi
+
+        # Sort the first input file based on the third column
+        sorted_table1=$(mktemp)
+        sort -t '|' -k 3,3 "$1" > "$sorted_table1"
+
+        # Sort the second input file based on the second column
+        sorted_table2=$(mktemp)
+        sort -t $'\t' -k 2,2 "$2" > "$sorted_table2"
+
+        sed -i 's/\t/\|/g' "$sorted_table2"
+
+        # Join the sorted tables using the third column for table 1 and the second column for table 2
+        join -t '|' -1 3 -2 2 -o 1.1,1.2,1.3,1.4,1.5,1.6,1.7,2.3 "$sorted_table1" "$sorted_table2"
+
+        # Clean up temporary files
+        rm "$sorted_table1" "$sorted_table2"
+    }
+
+
+    # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
+    # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
+    # But its fine this way too
+    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
+    join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
+    
     # Create the joint blast table
     echo "Creating joint blast table..."
+    # RdRp-scan_0.90.info is from Justine's paper https://academic.oup.com/ve/article-abstract/8/2/veac082/6679729
+    # RVDB tax file is the accession2taxid generated by the RVDB database build script /scratch/VELAB/Databases/update_db_3.pbs
+    # The rvdb_accession2taxid variable is set in the wrapper script and is based on the RVDB database used
     "$pathtoRscript"/Rscript "$scripts"/"$project"_create_blast_joint_table.R \
         --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
         --nt "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt \
@@ -274,7 +346,7 @@ function createSummaryTable() {
         --readcounts "$wd"/read_count/"$project"_accessions_reads \
         --output "$wd"/blast_results/summary_table_creation/temp_joint_blast_table \
         --rdrp_tax "$taxonomy"/RdRp-scan_0.90.info \
-        --rvdb_tax "$taxonomy"/RVDB_taxonomy_with_taxid.rds \
+        --rvdb_tax "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt \
         --multi_lib
 
     if [ $? -eq 0 ]; then
@@ -293,7 +365,7 @@ function createSummaryTable() {
         | awk '$2>0' \
         | cut -f 2- \
         | taxonkit reformat --output-ambiguous-result --data-dir /scratch/VELAB/Databases/Blast/taxdmp."$current_month"/  -I 1 -r "Unassigned" -R "missing_taxid" --fill-miss-rank -f "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}" \
-        | csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" >"$wd"/blast_results/summary_table_creation/temp_lineage_table
+        | csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" > "$wd"/blast_results/summary_table_creation/temp_lineage_table
 
     if [ $? -eq 0 ]; then
         echo "Lineage table created successfully."

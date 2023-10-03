@@ -188,3 +188,4 @@ write_csv(likely_viruses_folder_scaffold, paste0(opt$output, "_", tableType, "_t
 tableType <- "potential_viruses"
 potential_viruses_folder_scaffold <- createVirusFolderDF(paste0(opt$output, "_", tableType, ".csv"))
 write_csv(potential_viruses_folder_scaffold, paste0(opt$output, "_", tableType, "_table_scaffold.csv"))
+

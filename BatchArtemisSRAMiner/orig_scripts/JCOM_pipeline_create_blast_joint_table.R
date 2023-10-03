@@ -235,7 +235,10 @@ if (!is.na(opt$rdrp_tax)){
 }
 
 if (!is.na(opt$rvdb_tax)){
-  rvdb_taxonomy <- readRDS(opt$rvdb_tax)
+  rvdb_taxonomy <-  vroom(opt$rvdb_tax, 
+                          col_names = c("join_column","source","protein_accession","source2","nucl","genomic_region","organism","taxid"),
+                          show_col_types = FALSE,
+                          delim = "|")
 } else {
   message("Missing --rvdb_tax flag. Command will fail")
   rvdb_taxonomy <- ""
