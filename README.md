@@ -7,16 +7,16 @@ NOTE: This pipeline relies on several databases, modules and taxonomy files that
 
 Download the BatchArtemisSRAMiner package:
 
-1. Click the blue code button > Download .zip
-2. Transfer a safe spot in Artemis
-3. Unzip: `unzip BatchArtemisSRAMiner-main.zip`
-4. `cd BatchArtemisSRAMiner-main/scripts/; chmod +x ./*; nano setup.sh`
+1. Clone the repo `git clone https://github.com/JonathonMifsud/BatchArtemisSRAMiner.git`
+4. Enter the scripts folder, edit setup.sh `cd BatchArtemisSRAMiner-main/scripts/; chmod +x ./*; nano setup.sh`
 5. Change the `root`, `project` and `email` parameters. 
 6. Run the setup script `./setup.sh`
-7. `cd ../../../` and remove the install files `rm BatchArtemisSRAMiner-main BatchArtemisSRAMiner-main.zip`
+7. `cd ../../` and remove the install files `rm BatchArtemisSRAMiner-main BatchArtemisSRAMiner-main.zip`
 
-Downloading requires ascp (Aspera)
-- ADD INSTALL GUIDE ----
+Installing Aspera (ascp) is also recommended:
+Under the hood Kingfisher is used to try multiple SRA download methods. One of the fastest and most reliable is ENA using aspera. In most cases, aspera will need to be installed. To do this check out the following:
+https://www.biostars.org/p/325010/
+https://www.ibm.com/aspera/connect/ 
 
 Optional:
 Add the commands to your path
@@ -27,7 +27,6 @@ Add the line:
 Make sure to change the variable names!
 
 Then to load it: `source ~/.bashrc`
-
 
 Each general task you want to run is associated with a .sh (shell) and .pbs script. The .sh script works as a wrapper, passing parameters and variables to the .pbs script. After setting up, you usually don't need to edit the .pbs script.
 
@@ -53,10 +52,6 @@ E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 12. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
-
-
-### Custom Blasts
-The custom blast scripts are useful for running other blasts, but they require some adjustments to be compatible with the final summary table scripts.
 
 ### Monitoring Job Status
 
