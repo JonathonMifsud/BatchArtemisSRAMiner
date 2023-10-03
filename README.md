@@ -10,7 +10,7 @@ Download the BatchArtemisSRAMiner package:
 1. Click the blue code button > Download .zip
 2. Transfer a safe spot in Artemis
 3. Unzip: `unzip BatchArtemisSRAMiner-main.zip`
-4. `cd BatchArtemisSRAMiner-main/BatchArtemisSRAMiner/orig_scripts/; chmod +x ./*; nano setup.sh`
+4. `cd BatchArtemisSRAMiner-main/orig_scripts/; chmod +x ./*; nano setup.sh`
 5. Change the `root`, `project` and `email` parameters. 
 6. Run the setup script `./setup.sh`
 7. `cd ../../../` and remove the install files `rm BatchArtemisSRAMiner-main BatchArtemisSRAMiner-main.zip`
