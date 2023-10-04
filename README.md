@@ -42,7 +42,7 @@ The standard pipeline follows these steps:
 3. Run read triming, assembly and caculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`
 4. Check that all contigs are non-zero in size in `/project/your_root/your_project/contigs/final_contigs/`
 6. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
-7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc. `cat `
+7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
 The reason I do this is that it is expensive to run NT / NR blasts for each contig file because the giant databases have to be loaded in each time. Instead you concatentate all of the blast contigs together and run it once. 
 E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 8. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
