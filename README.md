@@ -41,7 +41,7 @@ The standard pipeline follows these steps:
 
 1. Download SRA e.g, `JCOM_pipeline_download_sra.sh` Note all the scripts will be renamed to reflect your project name.
 2. Check the that the raw reads have downloaded by looking in `/scratch/your_root/your_project/raw_reads` . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
-3. Run read triming, assembly and caculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`
+3. Run read trimming, assembly and calculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`. Trimming is currently setup for TruSeq3 PE and SE illumania libs and will also trim nextera 
 4. Check that all contigs are non-zero in size in `/project/your_root/your_project/contigs/final_contigs/`
 6. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
 7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
