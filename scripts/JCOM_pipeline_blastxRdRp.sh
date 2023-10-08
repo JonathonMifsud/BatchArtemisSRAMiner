@@ -67,22 +67,6 @@ else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi
 
-# NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
-if [ "$queue" = "defaultQ" ]; then
-    job_time="walltime=24:00:00"
-    queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
-fi
-
-if [ "$queue" = "scavenger" ]; then
-    job_time="walltime=48:00:00"
-    queue_project="$root_project"
-fi
-
-if [ "$queue" = "alloc-eh" ]; then
-    job_time="walltime=84:00:00"
-    queue_project="VELAB"
-fi
-
 #lets work out how many jobs we need from the length of input and format the J phrase for the pbs script
 jMax=$(wc -l <"$file_of_accessions")
 jIndex=$(expr "$jMax" - 1)
@@ -98,6 +82,6 @@ qsub -J "$jPhrase" \
     -e "/project/$root_project/$project/logs/blastxRdRp_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
-    -l "$job_time" \
-    -P "$queue_project" \
+    -l "24:00:00" \
+    -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_blastxRdRp.pbs

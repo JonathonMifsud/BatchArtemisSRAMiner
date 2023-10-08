@@ -81,12 +81,6 @@ if [ "$jPhrase" == "0-0" ]; then
     export jPhrase="0-1"
 fi
 
-# NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
-if [ "$queue" = "defaultQ" ]; then
-    job_time="walltime=84:00:00"
-    queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
-fi
-
 if [ "$db" = "" ]; then
     echo "No database specified. Use -d option to specify the database, please check the databse folder for newer verisons but for e.g, -d /scratch/VELAB/Databases/Blast/RVDB/U-RVDBv22.0-prot-exo_curated.dmnd"
     exit 1
@@ -97,6 +91,6 @@ qsub -J "$jPhrase" \
     -e "/project/$root_project/$project/logs/blastxRVDB_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,db=$db" \
     -q "$queue" \
-    -l "$job_time" \
-    -P "$queue_project" \
+    -l "84:00:00" \
+    -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_blastxRVDB.pbs
