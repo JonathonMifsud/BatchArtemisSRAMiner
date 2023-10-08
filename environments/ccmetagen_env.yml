@@ -1,0 +1,13 @@
+name: ccmetagen
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex
+  - _openmp_mutex
+  - kma=1.3.23
+  - libgcc-ng
+  - libgomp
+  - zlib
+prefix: /project/jcomvirome/anaconda3/envs/ccmetagen
