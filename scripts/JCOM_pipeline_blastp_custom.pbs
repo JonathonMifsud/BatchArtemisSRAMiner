@@ -1,6 +1,11 @@
 #!/bin/bash
-# JM
-# script to blastp and extract positive virus contigs
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
+###############################################################################################################
+
+# Script to blastp and extract positive virus contigs
 
 #PBS -N blastp_custom_array
 #PBS -l select=1:ncpus=12:mem=120GB
@@ -8,7 +13,7 @@
 #PBS -M jmif9945@uni.sydney.edu.au
 #PBS -m abe
 
-##load modules
+## load modules
 module load blast
 module load diamond/2.0.9
 
@@ -16,30 +21,25 @@ db_basename=$(basename "$db")
 
 # blastp
 function Blastp {
-    diamond blastp -q "$input" -d "$db" -t "$tempdir" -o "$outpath"/"$library_id"_"$db_basename"_blastp_results.txt -e 1E-4 -c2 -k 3 -b "$MEM" -p "$CPU" -f 6 qseqid qlen sseqid stitle pident length evalue --ultra-sensitive
+    diamond blastp -q "$input" -d "$db" -t "$wd" -o "$outpath"/"$library_id"_"$db_basename"_blastp_results.txt -e 1E-4 -c2 -k 3 -b "$MEM" -p "$CPU" -f 6 qseqid qlen sseqid stitle pident length evalue --ultra-sensitive
 }
 
-#tool to extract contigs from trinity assembly Blast to fasta
+# tool to extract contigs from trinity assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_"$db_basename"_blastp_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt"
-    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" $input > "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
+    grep -i ".*" "$outpath"/"$library_id"_"$db_basename"_blastp_results.txt | cut -f1 | uniq >"$outpath"/"$library_id""_temp_contig_names.txt"
+    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" $input >"$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed -i 's/--//' "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
-
 library_id="$(basename -- $input)"
-inpath=$(dirname -- $input)
 
-wd="$wd"
-cd "$wd"
-outpath="$wd"
+cd "$wd" || exit
 outpath="$wd"
 CPU=12
 MEM=2
-db="$db"
 
 Blastp
 blastToFasta

@@ -1,8 +1,8 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 #                                                                                                             #
 ###############################################################################################################
 
@@ -19,7 +19,6 @@
 #PBS -m abe
 #PBS -l select=1:ncpus=2:mem=30GB
 
-
 module load kingfisher
 module load sratoolkit/2.11.0
 
@@ -27,65 +26,65 @@ inpath="/scratch/$root_project/$project/raw_reads"
 cd "$inpath" || exit
 
 # read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
-readarray -t myarray < "$file_of_accessions"
+readarray -t myarray <"$file_of_accessions"
 export library_id=${myarray["$PBS_ARRAY_INDEX"]}
 
 kingfisher get -r "$library_id" -m ena-ascp ena-ftp prefetch aws-http aws-cp --force --prefetch-max-size 100000000 --output-format-possibilities fastq.gz fastq
 
 # is it single and unzipped? - unzip typically if ascp fails so it uses prefetch
-if [[ ( -f "$inpath"/"$library_id"".sra.fastq" ||  -f "$inpath"/"$library_id"".fastq" ) && ( ! -f "$inpath"/"$library_id"".sra.fastq.gz" || ! -f "$inpath"/"$library_id"".fastq.gz" ) ]]; then #e.g. if SRR1249328.fastq.gz exists and SRR1249328_1.fastq.gz doesn't layout == single
+if [[ (-f "$inpath"/"$library_id"".sra.fastq" || -f "$inpath"/"$library_id"".fastq") && (! -f "$inpath"/"$library_id"".sra.fastq.gz" || ! -f "$inpath"/"$library_id"".fastq.gz") ]]; then #e.g. if SRR1249328.fastq.gz exists and SRR1249328_1.fastq.gz doesn't layout == single
     echo "$library_id download is single and unzipped"
-    gzip -c "$inpath"/"$library_id".fastq > "$inpath"/"$library_id".fastq.gz || gzip -c "$inpath"/"$library_id".sra.fastq > "$inpath"/"$library_id".fastq.gz   
+    gzip -c "$inpath"/"$library_id".fastq >"$inpath"/"$library_id".fastq.gz || gzip -c "$inpath"/"$library_id".sra.fastq >"$inpath"/"$library_id".fastq.gz
     rm "$inpath"/"$library_id".fastq || rm "$inpath"/"$library_id".sra.fastq
 fi
 
 # is it paired and unzipped - unzip typically if ascp fails so it uses prefetch
-if [[ ( -f "$inpath"/"$library_id"".sra_1.fastq" ||  -f "$inpath"/"$library_id""_1.fastq" ) && ( -f "$inpath"/"$library_id"".sra_2.fastq" ||  -f "$inpath"/"$library_id""_2.fastq" ) ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
+if [[ (-f "$inpath"/"$library_id"".sra_1.fastq" || -f "$inpath"/"$library_id""_1.fastq") && (-f "$inpath"/"$library_id"".sra_2.fastq" || -f "$inpath"/"$library_id""_2.fastq") ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
     echo "$library_id download is paired and unzipped"
-    gzip -c "$inpath"/"$library_id"_1.fastq > "$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq > "$inpath"/"$library_id"_1.fastq.gz;
-    gzip -c "$inpath"/"$library_id"_2.fastq > "$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq > "$inpath"/"$library_id"_2.fastq.gz;
+    gzip -c "$inpath"/"$library_id"_1.fastq >"$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq >"$inpath"/"$library_id"_1.fastq.gz
+    gzip -c "$inpath"/"$library_id"_2.fastq >"$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq >"$inpath"/"$library_id"_2.fastq.gz
     rm "$inpath"/"$library_id"_1.fastq "$inpath"/"$library_id"_2.fastq || rm "$inpath"/"$library_id".sra_1.fastq "$inpath"/"$library_id".sra_2.fastq
 fi
 
 # there is sometimes a problem where _1 is created but not _2 - if this is the case restart
-if [ -f "$inpath"/"$library_id""_1.fastq.gz" ] && [ ! -f "$inpath"/"$library_id""_2.fastq.gz" ]; then 
+if [ -f "$inpath"/"$library_id""_1.fastq.gz" ] && [ ! -f "$inpath"/"$library_id""_2.fastq.gz" ]; then
     echo "$library_id download is missing _2"
     # in the case that _2 is missing we will redownload with a forced overwrite.
     kingfisher get -r "$library_id" -m ena-ascp ena-ftp prefetch --force --prefetch-max-size 100000000 --output-format-possibilities fastq.gz fastq
     # is it single and unzipped? - unzip typically if ascp fails so it uses prefetch
 
     # is it paired and unzipped - unzip typically if ascp fails so it uses prefetch
-    if [[ ( -f "$inpath"/"$library_id"".sra_1.fastq" ||  -f "$inpath"/"$library_id""_1.fastq" ) && ( -f "$inpath"/"$library_id"".sra_2.fastq" ||  -f "$inpath"/"$library_id""_2.fastq" ) ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
+    if [[ (-f "$inpath"/"$library_id"".sra_1.fastq" || -f "$inpath"/"$library_id""_1.fastq") && (-f "$inpath"/"$library_id"".sra_2.fastq" || -f "$inpath"/"$library_id""_2.fastq") ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
         echo "$library_id download is paired and unzipped"
-        gzip -c "$inpath"/"$library_id"_1.fastq > "$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq > "$inpath"/"$library_id"_1.fastq.gz;
-        gzip -c "$inpath"/"$library_id"_2.fastq > "$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq > "$inpath"/"$library_id"_2.fastq.gz;
+        gzip -c "$inpath"/"$library_id"_1.fastq >"$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq >"$inpath"/"$library_id"_1.fastq.gz
+        gzip -c "$inpath"/"$library_id"_2.fastq >"$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq >"$inpath"/"$library_id"_2.fastq.gz
         rm "$inpath"/"$library_id"_1.fastq "$inpath"/"$library_id"_2.fastq || rm "$inpath"/"$library_id".sra_1.fastq "$inpath"/"$library_id".sra_2.fastq
     fi
 fi
 
 # there is sometimes a problem where _1 is created but not _2 - if this is the case restart
-if [ ! -f "$inpath"/"$library_id""_1.fastq.gz" ] && [ -f "$inpath"/"$library_id""_2.fastq.gz" ]; then 
+if [ ! -f "$inpath"/"$library_id""_1.fastq.gz" ] && [ -f "$inpath"/"$library_id""_2.fastq.gz" ]; then
     echo "$library_id download is missing _1"
     # in the case that _2 is missing we will redownload with a forced overwrite.
     kingfisher get -r "$library_id" -m ena-ascp ena-ftp prefetch --prefetch-max-size 100000000 --force --output-format-possibilities fastq.gz fastq
 
     # is it paired and unzipped - unzip typically if ascp fails so it uses prefetch
-    if [[ ( -f "$inpath"/"$library_id"".sra_1.fastq" ||  -f "$inpath"/"$library_id""_1.fastq" ) && ( -f "$inpath"/"$library_id"".sra_2.fastq" ||  -f "$inpath"/"$library_id""_2.fastq" ) ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
-        gzip -c "$inpath"/"$library_id"_1.fastq > "$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq > "$inpath"/"$library_id"_1.fastq.gz;
-        gzip -c "$inpath"/"$library_id"_2.fastq > "$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq > "$inpath"/"$library_id"_2.fastq.gz;
+    if [[ (-f "$inpath"/"$library_id"".sra_1.fastq" || -f "$inpath"/"$library_id""_1.fastq") && (-f "$inpath"/"$library_id"".sra_2.fastq" || -f "$inpath"/"$library_id""_2.fastq") ]]; then #e.g. if SRR1249328.fastq.gz does not exist and SRR1249328_1.fastq.gz does layout == paired
+        gzip -c "$inpath"/"$library_id"_1.fastq >"$inpath"/"$library_id"_1.fastq.gz || gzip -c "$inpath"/"$library_id".sra_1.fastq >"$inpath"/"$library_id"_1.fastq.gz
+        gzip -c "$inpath"/"$library_id"_2.fastq >"$inpath"/"$library_id"_2.fastq.gz || gzip -c "$inpath"/"$library_id".sra_2.fastq >"$inpath"/"$library_id"_2.fastq.gz
         rm "$inpath"/"$library_id"_1.fastq "$inpath"/"$library_id"_2.fastq || rm "$inpath"/"$library_id".sra_1.fastq "$inpath"/"$library_id".sra_2.fastq
     fi
 fi
 
 # some files appear as gzipped but arent actually
 # here we check them and rezip if needed
-for i in $(ls "$inpath"/"$library_id"*.gz); do
+for i in "$inpath"/"${library_id}"*.gz; do
     if gzip -t "$i"; then
         echo "$i" 'file is ok'
-    else    
+    else
         echo "$i" 'file is corrupt'
         mv "$i" "$inpath"/temp_"$library_id"_file
-        gzip -c "$inpath"/temp_"$library_id"_file > "$i"
+        gzip -c "$inpath"/temp_"$library_id"_file >"$i"
         if gzip -t "$i"; then
             echo "$i" 'new file is ok'
         else
@@ -96,5 +95,5 @@ for i in $(ls "$inpath"/"$library_id"*.gz); do
 done
 
 # cleanup from ascp fails
-rm "$inpath"/"$library_id"*.aria2 "$inpath"/"$library_id"*.aspera-ckpt "$inpath"/"$library_id"*.partial 
-rm "$inpath"/"$library_id"*.aria2.gz "$inpath"/"$library_id"*.aspera-ckpt.gz "$inpath"/"$library_id"*.partial.gz 
+rm "$inpath"/"$library_id"*.aria2 "$inpath"/"$library_id"*.aspera-ckpt "$inpath"/"$library_id"*.partial
+rm "$inpath"/"$library_id"*.aria2.gz "$inpath"/"$library_id"*.aspera-ckpt.gz "$inpath"/"$library_id"*.partial.gz

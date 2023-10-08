@@ -1,5 +1,10 @@
 #!/bin/bash
-# JM
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #   
+#                                                JCO Mifsud                                                   # 
+#                                                   2023                                                      # 
+###############################################################################################################
+
 # script to blastn and extract positive virus contigs
 
 #PBS -N blastn_custom_array
@@ -29,13 +34,10 @@ function blastToFasta {
 }
 
 
-library_id="$(basename -- $input)"
-inpath=$(dirname -- $input)
+library_id="$(basename -- "$input")"
 
-wd="$wd"
 outpath="$wd"
 CPU=6
-MEM=2
 
 cd "$wd" || exit
 

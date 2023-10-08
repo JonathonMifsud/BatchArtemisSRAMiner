@@ -1,4 +1,9 @@
-#!/bin/bash 
+#!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
+###############################################################################################################
 
 # PBS job options
 #PBS -P $root_project
@@ -9,20 +14,26 @@
 #PBS -q defaultQ
 
 # Load a newer version of kma for tmp dir flag
-CONDA_BASE=$(conda info --base) 
+CONDA_BASE=$(conda info --base)
 if [ $? -ne 0 ]; then
     echo "Error: Unable to locate conda base directory."
     exit 1
 fi
 
 source $CONDA_BASE/etc/profile.d/conda.sh
-conda activate ccmetagen || { echo "Error: Failed to activate conda environment."; exit 1; }
+conda activate ccmetagen || {
+    echo "Error: Failed to activate conda environment."
+    exit 1
+}
 
 # Load ccmetagen module
-module load ccmetagen/1.1.3 || { echo "Error: Failed to load ccmetagen module."; exit 1; }
+module load ccmetagen/1.1.3 || {
+    echo "Error: Failed to load ccmetagen module."
+    exit 1
+}
 
 # Read in list of file names or accessions
-readarray -t myarray < "$file_of_accessions"
+readarray -t myarray <"$file_of_accessions"
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.fastq.gz//g' | sed 's/_*//g')
@@ -36,7 +47,10 @@ db=/scratch/VELAB/db_kma/ncbi_nt_no_env_11jun2019
 
 # Check if directories exist and move to working directory
 if [ -d "$wd" ]; then
-    cd "$wd" || { echo "Error: Cannot change directory to $wd"; exit 1; }
+    cd "$wd" || {
+        echo "Error: Cannot change directory to $wd"
+        exit 1
+    }
 else
     echo "Error: Directory $wd does not exist."
     exit 1
@@ -49,9 +63,15 @@ kma -ipe "$inpath"/"$library_id"_1.fastq.gz "$inpath"/"$library_id"_2.fastq.gz \
     -t "$threads" \
     -1t1 \
     -mem_mode \
-    -tmp /scratch/$root_project/ \
-    -and || { echo "Error: Failed to execute kma."; exit 1; }
+    -tmp /scratch/"$root_project"/ \
+    -and || {
+    echo "Error: Failed to execute kma."
+    exit 1
+}
 
 # Run CCMetagen
-CCMetagen.py -i "$outpath"/"$library_id"_out_kma.res -o "$outpath"/"$library_id"_ccmetagen \
-|| { echo "Error: Failed to execute CCMetagen."; exit 1; }
+CCMetagen.py -i "$outpath"/"$library_id"_out_kma.res -o "$outpath"/"$library_id"_ccmetagen ||
+    {
+        echo "Error: Failed to execute CCMetagen."
+        exit 1
+    }

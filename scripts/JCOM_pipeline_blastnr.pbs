@@ -3,7 +3,6 @@
 #                                            BatchArtemisSRAMiner                                             #   
 #                                                JCO Mifsud                                                   # 
 #                                                   2023                                                      # 
-#                                                                                                             #
 ###############################################################################################################
 
 # Underlying pbs script that is run using the wrapper script YOURPROJECT_blastnr.sh

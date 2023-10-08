@@ -1,15 +1,15 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
 
 # Underlying pbs script that is run using the wrapper script YOURPROJECT_blastxRdRp.sh
 # This script will run blastx on eacj contigs.fa file against Justine's RdRp database
 # Please remember to cite her paper https://academic.oup.com/ve/article-abstract/8/2/veac082/6679729
-# It will then extract the contigs that have a blast hit to the RdRp database which can be used in later steps such as Blastx against the NR and NT databases.    
+# It will then extract the contigs that have a blast hit to the RdRp database which can be used in later steps such as Blastx against the NR and NT databases.
+
 #PBS -N blastx_RdRp_array
 #PBS -l select=1:ncpus=6:mem=20GB
 #PBS -M jmif9945@uni.sydney.edu.au
@@ -26,27 +26,27 @@ function BlastxRdRp {
 
 #tool to extract contigs from trinity assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_rdrp_blastx_results.txt | cut -f1 | sort | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
-	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_rdrp_blastcontigs.fasta
-    sed -i 's/--//' "$outpath"/"$library_id"_rdrp_blastcontigs.fasta # remove -- from the contigs
-    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_rdrp_blastcontigs.fasta # remove the white space
+    grep -i ".*" "$outpath"/"$library_id"_rdrp_blastx_results.txt | cut -f1 | sort | uniq >"$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa >"$outpath"/"$library_id"_rdrp_blastcontigs.fasta
+    sed -i 's/--//' "$outpath"/"$library_id"_rdrp_blastcontigs.fasta                            # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_rdrp_blastcontigs.fasta                 # remove the white space
     sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_rdrp_blastcontigs.fasta # annotate the contigs
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
 # read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
-readarray -t myarray < "$file_of_accessions"
+readarray -t myarray <"$file_of_accessions"
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 
 # variables change these to whatever you like!
 wd=/project/"$root_project"/"$project"/blast_results
-inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
+inpath=/project/"$root_project"/"$project"/contigs/final_contigs # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
 tempdir=/scratch/"$root_project"/
 CPU=6
-MEM=2      
+MEM=2
 db=/scratch/VELAB/Databases/RdRp_db/RdRp-scan/RdRp-scan_0.90.dmnd
 
 # cd working dir

@@ -1,11 +1,16 @@
 #!/bin/bash
-# JM
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
+###############################################################################################################
+
 # script to blastx and extract positive virus contigs
 
 #PBS -N blastx_custom_array
 #PBS -l select=1:ncpus=6:mem=20GB
 #PBS -l walltime=24:00:00
-#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -M jmif9945@uni.sydney.edu.auß
 #PBS -m abe
 
 ##load modules
@@ -21,26 +26,21 @@ function Blastx {
 
 #tool to extract contigs from trinity assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_"$db_basename"_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt"
-    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" $input > "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
+    grep -i ".*" "$outpath"/"$library_id"_"$db_basename"_blastx_results.txt | cut -f1 | uniq >"$outpath"/"$library_id""_temp_contig_names.txt"
+    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" $input >"$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed -i 's/--//' "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_"$db_basename"_blastcontigs.fasta
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
-
 library_id="$(basename -- $input)"
-inpath=$(dirname -- $input)
 
-
-wd="$wd"
-cd "$wd"
+cd "$wd" || exit
 outpath="$wd"
 tempdir="$wd"
 CPU=6
 MEM=2
-db="$db"
 
 Blastx
 blastToFasta

@@ -132,7 +132,7 @@ Close and re-open your terminal. You should now have access to the conda command
 Conda will sometimes require more memory than the head node can provide causing memory issues when running `conda install` or `conda env create`. To get around this we can create a interactive environment using the following:
 `qsub -I -l select=1:ncpus=4:mem=20GB -l walltime=4:00:00 -M jmif9945@uni.sydney.edu.au -P VELAB -q defaultQ  -j oe`
 
-To create the environments:
+To create the environments run the following. Note the .yml can be found here or in the environments folder in your main dir (same level as the scripts / blast_results)
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/ccmetagen_env.yml`
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/project_pipeline.yml`
 `conda env create -f /project/VELAB/jcom_pipeline_taxonomy/r_env.yml`

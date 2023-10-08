@@ -1,9 +1,8 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
 
 # Underlying pbs script that is run using the wrapper script YOURPROJECT_blastnt.sh
@@ -25,23 +24,23 @@ function Blastn {
 
 #tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_nt_blastn_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
-	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_nt_blastcontigs.fasta
-    sed -i 's/--//' "$outpath"/"$library_id"_nt_blastcontigs.fasta # remove -- from the contigs
-    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_nt_blastcontigs.fasta # remove the white space
+    grep -i ".*" "$outpath"/"$library_id"_nt_blastn_results.txt | cut -f1 | uniq >"$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+    grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa >"$outpath"/"$library_id"_nt_blastcontigs.fasta
+    sed -i 's/--//' "$outpath"/"$library_id"_nt_blastcontigs.fasta                            # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_nt_blastcontigs.fasta                 # remove the white space
     sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_nt_blastcontigs.fasta # annotate the contigs
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
 # read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
-readarray -t myarray < "$file_of_accessions"
+readarray -t myarray <"$file_of_accessions"
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 
 # variables change these to whatever you like!--regexp-extended
 wd=/project/"$root_project"/"$project"/blast_results
-inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
+inpath=/project/"$root_project"/"$project"/contigs/final_contigs # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
 
 # cd working dir

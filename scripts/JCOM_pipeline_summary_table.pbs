@@ -1,21 +1,19 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
 
 # Script to take all of the blast ouput and construct a summary table
 
-########## PBS SCRIPT FOR SUMMARY TABLE ##########
 #PBS -N summary_table
 #PBS -l select=1:ncpus=8:mem=120GB
 #PBS -M jmif9945@uni.sydney.edu.au
 
 ## Blast output contigs should already be annotated with library ID
 
-function condaSetUp(){
+function condaSetUp() {
     CONDA_BASE=$(conda info --base) #figure out the path to conda directory so I can source it
     source $CONDA_BASE/etc/profile.d/conda.sh
     conda activate project_pipeline
@@ -54,8 +52,7 @@ function check_and_install_R_packages() {
     R -e "library('unixtools', lib.loc = c('$BUILD_DIR', .libPaths()))"
 
     # Loop through the list of package names provided as arguments
-    for PACKAGE_NAME in "$@"
-    do
+    for PACKAGE_NAME in "$@"; do
         echo "Checking package ${PACKAGE_NAME}"
 
         # Install packages within the BUILD_DIR
@@ -145,39 +142,39 @@ function createSummaryTable() {
     # Take output of final abundance calculate standardized abundance and add library name to the contig name and join all together
     echo "Number of Abundance files loaded: ${#abundance_files[@]}" # Count the number of abundance files
     for i in "${abundance_files[@]}"; do
-        id=$(basename "$i" | awk '{split($0,a,"_RSEM.isoforms.results"); print a[1]}') # Extract the ID from the file name
+        id=$(basename "$i" | awk '{split($0,a,"_RSEM.isoforms.results"); print a[1]}')                           # Extract the ID from the file name
         awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" >"$abundance"/"$id"_anno_RSEM.isoforms.results # Add the library name to the contig name in the abundance file
     done
 
     # Join all the abundance files together and place in "$wd"/blast_results/summary_table_creation/
     cat "$abundance"/*_anno_RSEM.isoforms.results >"$wd"/blast_results/summary_table_creation/combined_abundance_table.txt # Concatenate all abundance files into one file
-    rm "$abundance"/*_anno_RSEM.isoforms.results # Remove the individual abundance files
+    rm "$abundance"/*_anno_RSEM.isoforms.results                                                                           # Remove the individual abundance files
 
     # Do the same for the RdRp blast results for each library
     echo "Number of RdRp Blast files loaded: ${#rdrp_blast_files[@]}" # Count the number of RdRp blast files
     for i in "${rdrp_blast_files[@]}"; do
-        id=$(basename "$i" | awk '{split($0,a,"_rdrp_blastx_results.txt"); print a[1]}') # Extract the ID from the file name
-        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" > "$wd"/blast_results/"$id"_anno_rdrp_blastx_results.txt # Add the library name to the contig name in the RdRp blast file
+        id=$(basename "$i" | awk '{split($0,a,"_rdrp_blastx_results.txt"); print a[1]}')                                  # Extract the ID from the file name
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" >"$wd"/blast_results/"$id"_anno_rdrp_blastx_results.txt # Add the library name to the contig name in the RdRp blast file
     done
 
-    cat "$wd"/blast_results/*_anno_rdrp_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt # Concatenate all RdRp blast files into one file
-    rm "$wd"/blast_results/*_anno_rdrp_blastx_results.txt # Remove the individual RdRp blast files
+    cat "$wd"/blast_results/*_anno_rdrp_blastx_results.txt >"$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt # Concatenate all RdRp blast files into one file
+    rm "$wd"/blast_results/*_anno_rdrp_blastx_results.txt                                                                               # Remove the individual RdRp blast files
 
     # Do the same for the RVDB blast results for each library
     echo "Number of RVDB Blast files loaded: ${#rvdb_blast_files[@]}" # Count the number of RVDB blast files
     for i in "${rvdb_blast_files[@]}"; do
-        id=$(basename "$i" | awk '{split($0,a,"_RVDB_blastx_results.txt"); print a[1]}') # Extract the ID from the file name
-        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" > "$wd"/blast_results/"$id"_anno_RVDB_blastx_results.txt # Add the library name to the contig name in the RVDB blast file
+        id=$(basename "$i" | awk '{split($0,a,"_RVDB_blastx_results.txt"); print a[1]}')                                  # Extract the ID from the file name
+        awk -F'\t' -vOFS='\t' '{ $1 = $1 "_" id }1' id="$id" "$i" >"$wd"/blast_results/"$id"_anno_RVDB_blastx_results.txt # Add the library name to the contig name in the RVDB blast file
     done
 
-    cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt # Concatenate all RVDB blast files into one file
-    rm "$wd"/blast_results/*_anno_RVDB_blastx_results.txt # Remove the individual RVDB blast files
+    cat "$wd"/blast_results/*_anno_RVDB_blastx_results.txt >"$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt # Concatenate all RVDB blast files into one file
+    rm "$wd"/blast_results/*_anno_RVDB_blastx_results.txt                                                                               # Remove the individual RVDB blast files
 
     # Create a combined virus contig file in "$wd"/blast_results/summary_table_creation/ so that we can more easily extract contigs at a later stage
-    cat "${rdrp_blastcontigs_file[@]}" > "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta # Concatenate all RdRp blast contig files into one file
-    cat "${rvdb_blastcontigs_file[@]}" > "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta # Concatenate all RVDB blast contig files into one file
-    cat "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta > "$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Create a combined contig file by copying the RdRp blast contig file
-    cat "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta >> "$wd"/blast_results/summary_table_creation/combined_contigs.fasta # Append the RVDB blast contig file to the combined contig file
+    cat "${rdrp_blastcontigs_file[@]}" >"$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta                                            # Concatenate all RdRp blast contig files into one file
+    cat "${rvdb_blastcontigs_file[@]}" >"$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta                                            # Concatenate all RVDB blast contig files into one file
+    cat "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta >"$wd"/blast_results/summary_table_creation/combined_contigs.fasta         # Create a combined contig file by copying the RdRp blast contig file
+    cat "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta >>"$wd"/blast_results/summary_table_creation/combined_contigs.fasta        # Append the RVDB blast contig file to the combined contig file
     rm "$wd"/blast_results/summary_table_creation/combined_rdrp_blastcontigs.fasta "$wd"/blast_results/summary_table_creation/combined_RVDB_blastcontigs.fasta # Remove the individual blast contig files
 
     conda deactivate
@@ -197,15 +194,15 @@ function createSummaryTable() {
         fi
     else
         echo "Found combined_nr_blastx_results.txt and combined_nt_blastn_results.txt in summary_table_creation folder."
-    fi  
+    fi
 
     if [[ -n "$file_of_accessions" && -f "$file_of_accessions" ]]; then
         # Function to filter the files based on accessions
         function filter_files() {
             local input_file="$1"  # Path to the input file
-            local subset_file="$2"  # Path to the subset file
+            local subset_file="$2" # Path to the subset file
 
-            local temp_dir=$(mktemp -d -p "$wd/blast_results/summary_table_creation/")  # Create a temporary directory in the desired directory
+            local temp_dir=$(mktemp -d -p "$wd/blast_results/summary_table_creation/") # Create a temporary directory in the desired directory
 
             echo "Input file: $input_file"
             echo "Subset file: $subset_file"
@@ -214,7 +211,7 @@ function createSummaryTable() {
             # Check if input_file exists and is readable
             if [[ ! -r "$input_file" ]]; then
                 echo "Error: Input file '$input_file' does not exist or is not readable."
-                rm -rf "$temp_dir"  # Clean up temporary directory
+                rm -rf "$temp_dir" # Clean up temporary directory
                 return 1
             fi
 
@@ -223,17 +220,17 @@ function createSummaryTable() {
             # Check if subset_file exists and is readable
             if [[ ! -r "$subset_file" ]]; then
                 echo "Error: Subset file '$subset_file' does not exist or is not readable."
-                rm -rf "$temp_dir"  # Clean up temporary directory
+                rm -rf "$temp_dir" # Clean up temporary directory
                 return 1
             fi
 
             echo "Subset file exists and is readable."
 
-            local -A filtered_data  # Associative array to store filtered lines
+            local -A filtered_data # Associative array to store filtered lines
 
             # Extract unique contigs
             echo "Extracting unique contigs..."
-            cut -f1 "$input_file" | sort -u > "$temp_dir/contigs"
+            cut -f1 "$input_file" | sort -u >"$temp_dir/contigs"
 
             # Process each accession and filter input
             echo "Processing each accession and filtering input..."
@@ -241,21 +238,21 @@ function createSummaryTable() {
                 echo "Accession: $accession"
                 filtered_data["$accession"]=$(awk -v accession="$accession" '$0 ~ accession' "$input_file")
                 echo "Filtered data for accession '$accession': ${filtered_data["$accession"]}"
-            done < "$subset_file"
+            done <"$subset_file"
 
             # Write filtered data to separate files
             echo "Writing filtered data to separate files..."
             for accession in "${!filtered_data[@]}"; do
                 echo "Accession: $accession"
-                echo "${filtered_data["$accession"]}" > "$temp_dir/$accession.input"
+                echo "${filtered_data["$accession"]}" >"$temp_dir/$accession.input"
                 echo "Filtered data for accession '$accession' written to file: $temp_dir/$accession.input"
             done
 
             # Combine all input files
             echo "Combining all input files..."
-            if ! cat "$temp_dir"/*.input > "$wd/blast_results/summary_table_creation/filtered_$(basename "$input_file")"; then
+            if ! cat "$temp_dir"/*.input >"$wd/blast_results/summary_table_creation/filtered_$(basename "$input_file")"; then
                 echo "Error: Failed to combine input files."
-                rm -rf "$temp_dir"  # Clean up temporary directory
+                rm -rf "$temp_dir" # Clean up temporary directory
                 return 1
             fi
 
@@ -265,9 +262,8 @@ function createSummaryTable() {
             echo "Cleaning up temporary directory: $temp_dir"
             rm -rf "$temp_dir"
 
-            return 0  # Success
+            return 0 # Success
         }
-
 
         # Backup the original combined_nr_blastx_results.txt file
         if [[ -f "$wd/blast_results/summary_table_creation/combined_nr_blastx_results.txt" ]]; then
@@ -306,11 +302,11 @@ function createSummaryTable() {
         input_file="$1"
 
         # Step 1: Extract unique taxids from the blast results
-        cut -f3 "$input_file" | cut -f3 -d"|" | sort -u > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids
-        grep -Ff "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids "$rvdb_accession2taxid" > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered
+        cut -f3 "$input_file" | cut -f3 -d"|" | sort -u >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids
+        grep -Ff "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids "$rvdb_accession2taxid" >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered
 
         # Step 2: Parse header information and split it into columns
-        cut -f4 "$input_file" | sort -u > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers
+        cut -f4 "$input_file" | sort -u >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers
 
         # Step 3: Process and format the RVDB blast results
         awk -F '|' '{
@@ -335,7 +331,7 @@ function createSummaryTable() {
 
             # Print the modified original row followed by other columns
             print $0 "|" source "|" protein_accession "|" source2 "|" nucl_accession "|" genomic_region "|" organism
-        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers > temp_joint_RVDB_blast_table_headers_parsed
+        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers >temp_joint_RVDB_blast_table_headers_parsed
     }
     # Function to join two tables based on the second column
     join_tables() {
@@ -347,11 +343,11 @@ function createSummaryTable() {
 
         # Sort the first input file based on the third column
         sorted_table1=$(mktemp)
-        sort -t '|' -k 3,3 "$1" > "$sorted_table1"
+        sort -t '|' -k 3,3 "$1" >"$sorted_table1"
 
         # Sort the second input file based on the second column
         sorted_table2=$(mktemp)
-        sort -t $'\t' -k 2,2 "$2" > "$sorted_table2"
+        sort -t $'\t' -k 2,2 "$2" >"$sorted_table2"
         sed -i 's/\t/\|/g' "$sorted_table2"
 
         # Join the sorted tables using the third column for table 1 and the second column for table 2
@@ -364,15 +360,18 @@ function createSummaryTable() {
     # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
     # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
     # But its fine this way too
-    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
-    join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
-    
+    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
+    join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
+
     # Check if the readcounts file exists and is not empty
     # If the file does not exist or is empty, exit with an error
     # This is needed for abundance calculations
     # Ideally I should parse this file here and check that each run is found in the read count file
     # but I will do this later
-    [ -s "$wd/read_count/${project}_accessions_reads" ] || { echo "Read count file not found or empty, please run _readcount.sh Exiting."; exit 1; }
+    [ -s "$wd/read_count/${project}_accessions_reads" ] || {
+        echo "Read count file not found or empty, please run _readcount.sh Exiting."
+        exit 1
+    }
 
     # Create the joint blast table
     echo "Creating joint blast table..."
@@ -406,11 +405,11 @@ function createSummaryTable() {
     # Get lineage for all taxids
     echo "Getting lineage for taxids..."
     current_month=$(date +%b-%Y) # Get the current month
-    taxonkit lineage -c "$wd"/blast_results/summary_table_creation/temp_joint_blast_table_taxids --data-dir /scratch/VELAB/Databases/Blast/taxdmp."$current_month"/ \
-        | awk '$2>0' \
-        | cut -f 2- \
-        | taxonkit reformat --output-ambiguous-result --data-dir /scratch/VELAB/Databases/Blast/taxdmp."$current_month"/  -I 1 -r "Unassigned" -R "missing_taxid" --fill-miss-rank -f "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}" \
-        | csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" > "$wd"/blast_results/summary_table_creation/temp_lineage_table
+    taxonkit lineage -c "$wd"/blast_results/summary_table_creation/temp_joint_blast_table_taxids --data-dir /scratch/VELAB/Databases/Blast/taxdmp."$current_month"/ |
+        awk '$2>0' |
+        cut -f 2- |
+        taxonkit reformat --output-ambiguous-result --data-dir /scratch/VELAB/Databases/Blast/taxdmp."$current_month"/ -I 1 -r "Unassigned" -R "missing_taxid" --fill-miss-rank -f "{k}\t{p}\t{c}\t{o}\t{f}\t{g}\t{s}" |
+        csvtk add-header -t -n "taxid,lineage,kingdom,phylum,class,order,family,genus,species" >"$wd"/blast_results/summary_table_creation/temp_lineage_table
 
     if [ $? -eq 0 ]; then
         echo "Lineage table created successfully."
@@ -442,31 +441,31 @@ function extractContigsFromSummaryTable() {
     summary_table=$(echo "$input_table" | rev | cut -f2 -d"_" | rev)
     # input a table from project_filter_blast_table.R
     # output a fasta file containing the contigs from that table
-    cut -f1 -d"," "$input_table" | cut -f2 -d\" | uniq > "$wd"/temp_contig_list
-    grep -A1 -I -Ff "$wd"/temp_contig_list "$wd"/blast_results/summary_table_creation/combined_contigs.fasta > "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta
-    sed -i 's/--//' "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta # remove -- from the contigs
+    cut -f1 -d"," "$input_table" | cut -f2 -d\" | uniq >"$wd"/temp_contig_list
+    grep -A1 -I -Ff "$wd"/temp_contig_list "$wd"/blast_results/summary_table_creation/combined_contigs.fasta >"$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta
+    sed -i 's/--//' "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta            # remove -- from the contigs
     sed -i '/^[[:space:]]*$/d' "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta # remove the white space
-    rm "$wd"/temp_contig_list 
+    rm "$wd"/temp_contig_list
 }
 
-# the following are slightly broken and I haven't had a chance to fix so I currently don't split up the contig files by taxonomy 
-function createTaxaFolderStructure(){
+# the following are slightly broken and I haven't had a chance to fix so I currently don't split up the contig files by taxonomy
+function createTaxaFolderStructure() {
     summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
-    cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv | cut -f2 -d"," | sort | uniq | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|" > "$wd"/blast_results/summary_table_creation/dirs.txt 
+    cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv | cut -f2 -d"," | sort | uniq | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|" >"$wd"/blast_results/summary_table_creation/dirs.txt
     mkdir -p $(<"$wd"/blast_results/summary_table_creation/dirs.txt)
 }
 
-function createTaxaVirusContigFiles(){
+function createTaxaVirusContigFiles() {
     # requires createTaxaFolderStructure to be run
     summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
     for i in $(cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv); do
         contig=$(echo $i | cut -f1 -d",")
         taxa=$(echo $i | cut -f2 -d"," | sed 's|\; .*||g' | sed 's/ //g' | rev | cut -f1 -d";" | rev)
         taxa_path=$(echo $i | cut -f2 -d"," | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|")
-        grep -A1 "$contig" "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta >> "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta
-        sed -i 's/--//' "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta # remove -- from the contigs
+        grep -A1 "$contig" "$wd"/blast_results/summary_table_creation/"$summary_table"_summary_table_blastcontigs_$(date '+%Y%m%d').fasta >>"$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta
+        sed -i 's/--//' "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta            # remove -- from the contigs
         sed -i '/^[[:space:]]*$/d' "$taxa_path"/"$summary_table"_"$taxa"_contigs.fasta # remove the white space
-    done    
+    done
 }
 
 function cleanUp() {
@@ -499,7 +498,7 @@ pathtoRscript="/project/$root_project/anaconda3/envs/r_env/lib/R/bin/"
 
 condaSetUp && checkStatus
 
-# install the required R packages. This is horrible and will often fail for no real reason. I will have to make an image for this 
+# install the required R packages. This is horrible and will often fail for no real reason. I will have to make an image for this
 # The current fix is to load the r_env using conda r_env in an interactive session and manually installing these using the
 # check_and_install_R_packages function as below.
 check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" && checkStatus

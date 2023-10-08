@@ -1,9 +1,8 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
 
 #PBS -N unzip_and_get_read_count
@@ -12,10 +11,13 @@
 #PBS -m abe
 
 # Change directory to the project's read_count directory. If the directory does not exist, exit the script.
-cd /project/"$root_project"/"$project"/read_count || { echo "Directory not found"; exit 1; }
+cd /project/"$root_project"/"$project"/read_count || {
+    echo "Directory not found"
+    exit 1
+}
 
 # Read file_of_accessions line by line into an array
-readarray -t myarray < "$file_of_accessions"
+readarray -t myarray <"$file_of_accessions"
 
 # Get the corresponding line from the array based on the PBS_ARRAY_INDEX
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
@@ -27,12 +29,15 @@ new_name=${library_run%".gz"}
 library_id="$(basename -- $new_name)"
 
 # Unzip the gzipped file and write the contents to new_name. If this fails, exit the script.
-gunzip -c "$library_run" > "$new_name" || { echo "Failed to unzip $library_run"; exit 1; }
+gunzip -c "$library_run" >"$new_name" || {
+    echo "Failed to unzip $library_run"
+    exit 1
+}
 
 # Calculate the read count by dividing the total number of lines in the file by 4 (since each read in FASTQ format consists of 4 lines)
 # The -n option with echo is used to prevent adding a new line
 # The result is appended to a file named project_accessions_reads
-echo -n "$library_id"","`echo $(cat $new_name|wc -l)/4 | bc`"\n" >> /project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
+echo -n "$library_id"","$(echo $(cat $new_name | wc -l)/4 | bc)"\n" >>/project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
 
 # Remove the unzipped file to save space. If this fails, print an error message but do not exit the script.
 rm "$new_name" || echo "Failed to remove $new_name"

@@ -1,9 +1,8 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
-#                                                                                                             #
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
 
 # A function to check if the dir contains all of the sras specified in the file_of_accessions
@@ -13,34 +12,36 @@
 
 while getopts "d:f:" 'OPTKEY'; do
     case "$OPTKEY" in
-            'd')
-                # dir containing the raw sequence files
-                directory="$OPTARG"
-                ;;
-            'f')
-                # text file containing the SRA accessions that should be downloaded used to cross reference files in the directory
-                file_of_accessions="$OPTARG"
-                ;;
-            
-        esac
-    done
-    
-    shift $(( OPTIND - 1 ))
+    'd')
+        # dir containing the raw sequence files
+        directory="$OPTARG"
+        ;;
+    'f')
+        # text file containing the SRA accessions that should be downloaded used to cross reference files in the directory
+        file_of_accessions="$OPTARG"
+        ;;
+    *)
+        # Handle invalid flags here
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+    esac
+done
 
-    if [ "$directory" = "" ]
-        then
-            echo "No directory string entered. Use -d to specify the FULL PATH to the directory containing raw sequence files"
-    exit 1
-    fi
+shift $((OPTIND - 1))
 
-    if [ "$file_of_accessions" = "" ]
-        then
-            echo "No file containing SRA to run specified. Use -f file containing SRA accessions"
+if [ "$directory" = "" ]; then
+    echo "No directory string entered. Use -d to specify the FULL PATH to the directory containing raw sequence files"
     exit 1
-    fi
+fi
+
+if [ "$file_of_accessions" = "" ]; then
+    echo "No file containing SRA to run specified. Use -f file containing SRA accessions"
+    exit 1
+fi
 
 # Get a list of all of the SRA ids in the current directory
-ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1  | cut -d'.' -f1 | sort | uniq > "$directory"/sra_ids.txt
+ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1 | cut -d'.' -f1 | sort | uniq >"$directory"/sra_ids.txt
 
 # if missing_sra_ids.txt exists already, remove it
 if [ -f "$directory"/missing_sra_ids.txt ]; then
@@ -74,7 +75,7 @@ for i in $(cat "$directory"/sra_ids.txt); do
             # If it does not exist, remove the first file
             rm "$directory"/"$i""_1.fastq.gz"
             # And add the SRA id to a file containing the missing SRA ids
-            echo "$i" >> "$directory"/missing_sra_ids.txt
+            echo "$i" >>"$directory"/missing_sra_ids.txt
         fi
     fi
 
@@ -83,22 +84,21 @@ for i in $(cat "$directory"/sra_ids.txt); do
     if [ "$layout" = "single" ]; then
         if [ ! -f "$directory"/"$i"".fastq.gz" ]; then
             # If it does not exist, add the SRA id to a file containing the missing SRA ids
-            echo "$i" >> "$directory"/missing_sra_ids.txt
+            echo "$i" >>"$directory"/missing_sra_ids.txt
         fi
     fi
-done 
+done
 
 # Get a list of all of the SRA ids in the current directory after the cleanup
-ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1  | cut -d'.' -f1 | sort | uniq > "$directory"/cleanup_sra_ids.txt
+ls "$directory"/*.fastq.gz | perl -ne '$_ =~ s[.*/(.*)][$1]; print "$_";' | cut -d'_' -f1 | cut -d'.' -f1 | sort | uniq >"$directory"/cleanup_sra_ids.txt
 
 # Compare the cleanup list to the original list
 # If they do not match, add the missing SRA ids to the missing_sra_ids.txt file
-grep -Fxvf "$directory"/cleanup_sra_ids.txt  "$file_of_accessions" >> "$directory"/missing_sra_ids.txt
+grep -Fxvf "$directory"/cleanup_sra_ids.txt "$file_of_accessions" >>"$directory"/missing_sra_ids.txt
 
 # It is likely that there will be duplicates in the missing_sra_ids.txt file
 # Remove the duplicates and edit the file in place
-awk '!a[$0]++' "$directory"/missing_sra_ids.txt > "$directory"/missing_sra_ids.txt.tmp && mv "$directory"/missing_sra_ids.txt.tmp "$directory"/missing_sra_ids.txt
-
+awk '!a[$0]++' "$directory"/missing_sra_ids.txt >"$directory"/missing_sra_ids.txt.tmp && mv "$directory"/missing_sra_ids.txt.tmp "$directory"/missing_sra_ids.txt
 
 # Reset the color without outputting anything
 reset_color="\e[0m"
@@ -114,7 +114,7 @@ if [ $(grep -c . "$directory"/missing_sra_ids.txt) -eq 0 ]; then
     color1="\e[31m" # Red
     color2="\e[32m" # Green
     new_str=""
-    for (( i=0; i<${#str}; i++ )); do
+    for ((i = 0; i < ${#str}; i++)); do
         if ((i % 2 == 0)); then
             new_str+="${color1}${str:$i:1}"
         else
@@ -140,9 +140,9 @@ else
     for file in "$directory"/*; do
         if [[ $file =~ temp_SRR.*_file ]]; then
             # Remove path and unwanted parts from the filename
-            temp_file=${file##*/}       # Remove path
-            temp_file=${temp_file#temp_}   # Remove 'temp_' prefix
-            temp_file=${temp_file%_file}   # Remove '_file' suffix
+            temp_file=${file##*/}        # Remove path
+            temp_file=${temp_file#temp_} # Remove 'temp_' prefix
+            temp_file=${temp_file%_file} # Remove '_file' suffix
             temp_files+=("$temp_file")
         fi
     done
@@ -153,7 +153,7 @@ else
             echo "$temp_file"
         done
 
-         echo -e "\e[33m""If files are parital, remove them and rerun this script to get an updated missing_sra_ids.txt file which can be used as input for redownloading."
+        echo -e "\e[33m""If files are parital, remove them and rerun this script to get an updated missing_sra_ids.txt file which can be used as input for redownloading."
         echo -e "${reset_color}"
     fi
 fi

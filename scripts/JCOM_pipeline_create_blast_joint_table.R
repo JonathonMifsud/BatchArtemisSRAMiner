@@ -2,18 +2,19 @@
 
 # Jonathon Mifsud
 # University of Sydney
-# 23/08/2021
-# Summary table for Vince
 
-# usage: ./create_blast_summary_table.R -a -2 protein_table -id rdrp_lineage_table
+# This script takes the blast results from the JCOM pipeline and creates a
+# summary table of the results. It also extracts the taxids from the blast
+# results and outputs them to a separate file
+# This script is designed to be run on the command line using Rscript
+# All dependencies are installed during _summary_table.sh
 
-# THERE ARE RVDB HITS WITHOUT DESCRIPTIONS AND THEY ARE ENDING UP IN OTHER CHECK THESE
-
+# Packages ---------------------------------------------------------------------
 suppressPackageStartupMessages(require(optparse)) # don't say "Loading required package: optparse"
 suppressPackageStartupMessages(require(tidyverse))
 suppressPackageStartupMessages(require(vroom))
 
-
+# Functions --------------------------------------------------------------------
 blastSortByEvalue <- function(blastTable) {
   # input a blast txt results delim file 
   # formatted as so -f 6 qseqid qlen sseqid stitle pident length evalue
@@ -130,6 +131,7 @@ blastExtractTaxidFromJoinTable <- function(blast_join_table){
   
   return(taxids)
 }
+
 
 # Options ----------------------------------------------------------------------
 option_list = list(

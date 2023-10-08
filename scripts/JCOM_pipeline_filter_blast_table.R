@@ -2,8 +2,10 @@
 
 # Jonathon Mifsud
 # University of Sydney
-# 18/07/22
-# Filter blast table
+
+# This script takes the output of the blast table and filters it based on the
+# taxonomy table. Using the results of the 4 blasts it will classify the contigs as either Likely Viruses, Potential-Viruses
+# or Non-Viral outputting seperate csv tables for each classification.
 
 # Packages ---------------------------------------------------------------------
 suppressPackageStartupMessages(require(optparse)) # don't say "Loading required package: optparse"
@@ -188,4 +190,3 @@ write_csv(likely_viruses_folder_scaffold, paste0(opt$output, "_", tableType, "_t
 tableType <- "potential_viruses"
 potential_viruses_folder_scaffold <- createVirusFolderDF(paste0(opt$output, "_", tableType, ".csv"))
 write_csv(potential_viruses_folder_scaffold, paste0(opt$output, "_", tableType, "_table_scaffold.csv"))
-
