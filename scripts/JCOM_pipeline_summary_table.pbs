@@ -22,18 +22,55 @@ function condaSetUp(){
 }
 
 function check_and_install_R_packages() {
-    # Create a temporary directory
-    conda activate r_env
-    TMPDIR=$(mktemp -d)
+    # There is major overkill in setting the temp dir here but I was having so much problems with it and something worked
+    # I think it would be possible to remove all of the unix tools sections and it would still work!
+    # Store the original TMPDIR
+    original_TMPDIR="$TMPDIR"
+    BUILD_DIR="$wd/r_tmp_build"
 
+    # Check if BUILD_DIR exists, and create it if not
+    if [ ! -d "$BUILD_DIR" ]; then
+        mkdir -p "$BUILD_DIR"
+    fi
+
+    # Check if TMPDIR exists, and create it if not
+    if [ ! -d "$TMPDIR" ]; then
+        mkdir -p "$TMPDIR"
+    fi
+
+    # Set TMPDIR to BUILD_DIR
+    export TMPDIR="$BUILD_DIR"
+
+    # Set permissions for the temporary build directory
+    chmod +x "$BUILD_DIR"
+
+    # Activate the Conda environment for R
+    conda activate r_env
+
+    # Check if the 'unixtools' R package is installed, and install it if not
+    R -e 'if (!("unixtools" %in% installed.packages())) {print("Installing unixtools..."); install.packages("unixtools", repos="https://rforge.net", INSTALL_opts = paste0("--library=", shQuote("'$BUILD_DIR'", type = "cmd"))) } else {print("unixtools is already installed")}'
+
+    # Load the 'unixtools' R package
+    R -e "library('unixtools', lib.loc = c('$BUILD_DIR', .libPaths()))"
+
+    # Loop through the list of package names provided as arguments
     for PACKAGE_NAME in "$@"
     do
         echo "Checking package ${PACKAGE_NAME}"
-        R -e 'if (!("'"${PACKAGE_NAME}"'" %in% installed.packages())) {print("Installing"); install.packages("'"${PACKAGE_NAME}"'", repos="https://cloud.r-project.org/", dependencies = TRUE, INSTALL_opts = "--no-lock")} else {print("Already installed")}'
+
+        # Install packages within the BUILD_DIR
+        R -e "setwd('$BUILD_DIR'); cat(paste('Current working directory in R:', getwd(), '\n'))"
+        R -e "unixtools::set.tempdir('$BUILD_DIR'); cat(paste('Temporary directory in R:', tempdir(), '\n'))"
+        R -e 'if (!("'"${PACKAGE_NAME}"'" %in% installed.packages())) {print("Installing '"${PACKAGE_NAME}"'..."); install.packages("'"${PACKAGE_NAME}"'", repos="https://cloud.r-project.org/", dependencies = TRUE, INSTALL_opts = paste0("--library=", shQuote("'$BUILD_DIR'", type = "cmd")))} else {print("'"${PACKAGE_NAME}"' is already installed")}'
     done
 
-    # Remove the temporary directory
-    rm -rf "$TMPDIR"
+    # Restore the original TMPDIR
+    export TMPDIR="$original_TMPDIR"
+
+    # Remove the temporary build directory
+    rm -rf "$BUILD_DIR"
+
+    # Deactivate the Conda environment
     conda deactivate
 }
 
@@ -57,11 +94,11 @@ function createSummaryTable() {
 
         # Iterate over each accession ID and find corresponding files
         for id in $accession_ids; do
-            abundance_file="$abundance/${id}_RSEM.isoforms.results"
-            rdrp_blast_file="$wd/blast_results/${id}_rdrp_blastx_results.txt"
-            rvdb_blast_file="$wd/blast_results/${id}_RVDB_blastx_results.txt"
-            rdrp_blastcontigs="$wd/blast_results/${id}_rdrp_blastcontigs.fasta"
-            rvdb_blastcontigs="$wd/blast_results/${id}_RVDB_blastcontigs.fasta"
+            abundance_file="$abundance"/"${id}"_RSEM.isoforms.results
+            rdrp_blast_file="$wd"/blast_results/"${id}"_rdrp_blastx_results.txt
+            rvdb_blast_file="$wd"/blast_results/"${id}"_RVDB_blastx_results.txt
+            rdrp_blastcontigs="$wd"/blast_results/"${id}"_rdrp_blastcontigs.fasta
+            rvdb_blastcontigs="$wd"/blast_results/"${id}"_RVDB_blastcontigs.fasta
 
             # Check if the abundance file exists
             if [ -f "$abundance_file" ]; then
@@ -299,7 +336,7 @@ function createSummaryTable() {
             # Print the modified original row followed by other columns
             print $0 "|" source "|" protein_accession "|" source2 "|" nucl_accession "|" genomic_region "|" organism
         }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers > temp_joint_RVDB_blast_table_headers_parsed
-
+    }
     # Function to join two tables based on the second column
     join_tables() {
         # Check if both input files exist
@@ -315,7 +352,6 @@ function createSummaryTable() {
         # Sort the second input file based on the second column
         sorted_table2=$(mktemp)
         sort -t $'\t' -k 2,2 "$2" > "$sorted_table2"
-
         sed -i 's/\t/\|/g' "$sorted_table2"
 
         # Join the sorted tables using the third column for table 1 and the second column for table 2
@@ -325,18 +361,26 @@ function createSummaryTable() {
         rm "$sorted_table1" "$sorted_table2"
     }
 
-
     # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
     # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
     # But its fine this way too
     process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
     join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered > "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
     
+    # Check if the readcounts file exists and is not empty
+    # If the file does not exist or is empty, exit with an error
+    # This is needed for abundance calculations
+    # Ideally I should parse this file here and check that each run is found in the read count file
+    # but I will do this later
+    [ -s "$wd/read_count/${project}_accessions_reads" ] || { echo "Read count file not found or empty, please run _readcount.sh Exiting."; exit 1; }
+
     # Create the joint blast table
     echo "Creating joint blast table..."
     # RdRp-scan_0.90.info is from Justine's paper https://academic.oup.com/ve/article-abstract/8/2/veac082/6679729
     # RVDB tax file is the accession2taxid generated by the RVDB database build script /scratch/VELAB/Databases/update_db_3.pbs
     # The rvdb_accession2taxid variable is set in the wrapper script and is based on the RVDB database used
+    conda deactivate
+    conda activate r_env
     "$pathtoRscript"/Rscript "$scripts"/"$project"_create_blast_joint_table.R \
         --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
         --nt "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt \
@@ -356,6 +400,7 @@ function createSummaryTable() {
         exit 1
     fi
 
+    conda deactivate
     conda activate project_pipeline
 
     # Get lineage for all taxids
@@ -424,7 +469,6 @@ function createTaxaVirusContigFiles(){
     done    
 }
 
-
 function cleanUp() {
     rm "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_*_viruses_table_scaffold.csv
     rm "$wd"/blast_results/summary_table_creation/temp_*
@@ -454,7 +498,12 @@ taxonomy="/project/VELAB/jcom_pipeline_taxonomy"
 pathtoRscript="/project/$root_project/anaconda3/envs/r_env/lib/R/bin/"
 
 condaSetUp && checkStatus
+
+# install the required R packages. This is horrible and will often fail for no real reason. I will have to make an image for this 
+# The current fix is to load the r_env using conda r_env in an interactive session and manually installing these using the
+# check_and_install_R_packages function as below.
 check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" && checkStatus
+
 createSummaryTable && checkStatus
 
 input_table="$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_likely_viruses.csv
@@ -467,6 +516,5 @@ extractContigsFromSummaryTable && checkStatus
 #createTaxaFolderStructure && checkStatus
 #createTaxaVirusContigFiles && checkStatus
 
-#zip -r "$wd"/blast_results/summary_table_creation/virus_fasta_files.zip "$wd"/blast_results/summary_table_creation/virus_fasta_files
-
+#zip -r "$wd"/blast_results/summary_table_creation/virus_fasta_files.zip "$wd"/blast_results/summary_table_creation/virus_fasta_file
 cleanUp && checkStatus

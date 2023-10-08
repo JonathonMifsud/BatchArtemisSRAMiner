@@ -73,7 +73,7 @@ done
     
     if [ "$rvdb_database" = "" ]
         then
-            echo "Please provide the full path to the RVDB database used. Use e.g., /scratch/VELAB/Databases/Blast/RVDB.prot.v26.Jul-2023.dmnd"
+            echo "No RVDB database provided (-d). Please provide the full path to the RVDB database used. Use e.g., /scratch/VELAB/Databases/Blast/RVDB.prot.v26.Jul-2023.dmnd"
     exit 1
     fi
 
