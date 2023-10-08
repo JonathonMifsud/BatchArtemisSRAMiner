@@ -32,7 +32,7 @@ mkdir -p "${scratch_dir}"/abundance/final_abundance
 # Move all files from the current directory to the project's scripts directory
 echo "Moving files to the project's scripts directory..."
 mv ./* "${project_dir}/scripts"
-mv ../environment/* "${project_dir}/environments/"
+mv ../environments/* "${project_dir}/environments/"
 mv ../adapters/* "${project_dir}/adapters/"
 
 # Navigate to the project's scripts directory
