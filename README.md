@@ -142,3 +142,5 @@ To create the environments run the following. Note the .yml can be found here or
 ### Storage:
 I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
 
+### How to cite this repo?
+If this repo was somehow useful a citation would be greatly appeciated! The best way to get a reference file is to click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
