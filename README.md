@@ -1,9 +1,10 @@
+<a href="https://zenodo.org/badge/latestdoi/616299128"><img src="https://zenodo.org/badge/616299128.svg" alt="DOI"></a>
+
 ## Installation
 
-A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining.
-If you run into any problems please don't hesitate to open an issue or shoot me an email `jmif9945@uni.sydney.edu.au`. Code is a little janky and documentation is a work in progress so please let me know if I should add anything!
+A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining. Code is a little janky and documentation is a work in progress!
 
-The premise of the workflow is to quickly set up a folder structure and script set for a given project.
+The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
 
 NOTE: This pipeline relies on several databases, modules and taxonomy files that are available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me an email.
 
