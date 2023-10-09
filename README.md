@@ -19,16 +19,6 @@ Under the hood Kingfisher is used to try multiple SRA download methods. One of t
 https://www.biostars.org/p/325010/
 https://www.ibm.com/aspera/connect/ 
 
-Optional:
-Add the commands to your path
-`nano ~/.bashrc`
-Add the line: 
-`export PATH="/project/YOURROOT/YOURPROJECT/scripts/:$PATH"`
-
-Make sure to change the variable names!
-
-Then to load it: `source ~/.bashrc`
-
 Each general task you want to run is associated with a .sh (shell) and .pbs script. The .sh script works as a wrapper, passing parameters and variables to the .pbs script. After setting up, you usually don't need to edit the .pbs script.
 
 If you are unsure about what variables/files need to be passed to a script, refer to the .sh script.
@@ -66,6 +56,15 @@ Enter q to check the job status. If you want to make this alias permanent, add i
 
 `nano ~/.bashrc`
 Add the line: `alias q="qstat -Jtan1 -xu jmif9945 | tail -n100; qstat -u jmif9945"`
+
+Then to load it: `source ~/.bashrc`
+
+Add the commands to your path
+`nano ~/.bashrc`
+Add the line: 
+`export PATH="/project/YOURROOT/YOURPROJECT/scripts/:$PATH"`
+
+Make sure to change the variable names!
 
 Then to load it: `source ~/.bashrc`
 
