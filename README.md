@@ -28,7 +28,7 @@ The scripts are designed to process batches, so they require a list of filenames
 ## Pipeline
 The standard pipeline follows these steps:
 
-1. Download SRA e.g, `JCOM_pipeline_download_sra.sh` Note all the scripts will be renamed to reflect your project name.
+1. Download SRA e.g, `JCOM_pipeline_download_sra.sh` Note all the scripts will be renamed to reflect your project name. This can be skipped if you have generated the sequencing data yourself (!see section Non-SRA libaries)
 2. Check the that the raw reads have downloaded by looking in `/scratch/your_root/your_project/raw_reads` . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
 3. Run read trimming, assembly and calculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`. Trimming is currently setup for TruSeq3 PE and SE illumania libs and will also trim nextera 
 4. Check that all contigs are non-zero in size in `/project/your_root/your_project/contigs/final_contigs/`
