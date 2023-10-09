@@ -1,6 +1,6 @@
 <a href="https://zenodo.org/badge/latestdoi/616299128"><img src="https://zenodo.org/badge/616299128.svg" alt="DOI"></a>
 
-A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining. Code is a little janky and documentation is a work in progress!
+A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a little janky and documentation is a work in progress!
 
 The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
 
