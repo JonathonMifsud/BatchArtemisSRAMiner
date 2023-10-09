@@ -1,15 +1,12 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: Mifsud
-    given-names: Jonathon C.O.
-    orcid: https://orcid.org/0000-0001-8934-9193
-title: JonathonMifsud/BatchArtemisSRAMiner: v1.0.0
+  - family-names: "Mifsud"
+    given-names: "Jonathon C.O."
+    orcid: "https://orcid.org/0000-0001-8934-9193"
+title: "JonathonMifsud/BatchArtemisSRAMiner: v1.0.0"
 version: v.1.0.0
 repository-code: https://github.com/JonathonMifsud/BatchArtemisSRAMiner
 date-released: 2023-10-08
+doi: 10.5281/zenodo.8417951
 license: MIT License
-keywords:
-  - bioinformatics
-  - SRA
-  - virus discovery
