@@ -83,6 +83,6 @@ qsub -o "/project/$root_project/$project/logs/summary_table_creation_$project_$(
     -e "/project/$root_project/$project/logs/summary_table_creation_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,root_project=$root_project,file_of_accessions=$file_of_accessions,rvdb_accession2taxid=$rvdb_accession2taxid" \
     -q "$queue" \
-    -l "3:00:00" \
+    -l "walltime=3:00:00" \
     -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_summary_table.pbs

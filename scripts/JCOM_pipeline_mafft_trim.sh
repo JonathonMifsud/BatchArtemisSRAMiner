@@ -60,6 +60,6 @@ qsub -o "/project/$root_project/$project/logs/mafft_alignment_$(date '+%Y%m%d')_
     -e "/project/$root_project/$project/logs/mafft_alignment_$(date '+%Y%m%d')_stderr.txt" \
     -v "sequences=$sequences" \
     -q "$queue" \
-    -l "12:00:00" \
+    -l "walltime=12:00:00" \
     -P "$root_project" \
     /project/$root_project/$project/scripts/JCOM_pipeline_mafft_trim.pbs

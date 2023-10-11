@@ -67,6 +67,6 @@ qsub -o "/project/"$root_project"/"$project"/logs/fasttree_$(date '+%Y%m%d')_sto
     -e "/project/"$root_project"/"$project"/fasttree_$(date '+%Y%m%d')_stderr.txt" \
     -v "alignment=$alignment" \
     -q "$queue" \
-    -l "48:00:00" \
+    -l "walltime=48:00:00" \
     -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_fasttree.pbs

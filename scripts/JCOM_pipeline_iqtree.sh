@@ -72,6 +72,6 @@ qsub -o "/project/$root_project/$project/logs/iqtree_$(date '+%Y%m%d')_stout.txt
     -e "/project/$root_project/$project/logs/iqtree_$(date '+%Y%m%d')_stderr.txt" \
     -v "alignment=$alignment,model=$model" \
     -q "$queue" \
-    -l "48:00:00" \
+    -l "walltime=48:00:00" \
     -P "$root_project" \
     /project/$root_project/$project/scripts/JCOM_pipeline_iqtree.pbs

@@ -85,6 +85,6 @@ qsub -J $jPhrase \
     -e "/project/$root_project/$project/logs/sra_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
-    -l "12:00:00" \
+    -l "walltime=12:00:00" \
     -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_sra.pbs
