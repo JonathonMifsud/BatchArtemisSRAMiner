@@ -6,4 +6,3 @@ channels:
 dependencies:
   - csvtk=0.25.0
   - taxonkit=0.14.2
-prefix: /project/jcomvirome/anaconda3/envs/project_pipeline

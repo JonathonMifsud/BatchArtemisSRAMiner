@@ -99,4 +99,3 @@ dependencies:
   - xz=5.2.5=h516909a_1
   - zlib=1.2.12=h166bdaf_2
   - zstd=1.5.2=h8a70e8d_2
-prefix: /project/jcomvirome/anaconda3/envs/r_env
