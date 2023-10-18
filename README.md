@@ -6,7 +6,8 @@
   - [Job Status Shortcut](#job-status-shortcut)
   - [Common Flags](#common-flags)
   - [Non-SRA Libraries](#non-sra-libraries)
-  - [Storage:](#storage)
+  - [Fastqc](#fastqc)
+  - [Storage](#storage)
 - [Troubleshooting](#troubleshooting)
 - [Installing Anaconda](#installing-anaconda)
 - [How to cite this repo?](#how-to-cite-this-repo)
@@ -109,7 +110,12 @@ You can also use the script with non-SRA libraries by cleaning the original raw 
 E.g., hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC_L002_R1.fastq.gz -> hpv3t10_1.fastq.gz
 The main thing is that underscores are only used to seperate the ID (hpv3t10) and the read file direction (1) and that the "R" in R1/2 is remove. 
 
-### Storage:
+### Fastqc
+
+If you would like to examine the qc of libraries before and after trimming you can use the `_fastqc.sh` script. This takes the standard accession_list file and will run fastqc on the raw reads and the two outputs from the trimmed reads, 1. the trimmed reads i.e. those that are kept and 2. the removed reads. Check `/project/your_root/your_project/fastqc/` for results. So ensure that you run this after the `_trim_assembly_abundance.sh`.
+
+### Storage
+
 I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
 
 ## Troubleshooting
@@ -156,4 +162,4 @@ To create the environments run the following. Note the .yml can be found here or
 `conda env create -f /project/^your_root_project^/^your_project^/environments/r_env.yml`
 
 ## How to cite this repo?
-If this repo was somehow useful a citation would be greatly appeciated! The best way to get a reference file is to click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
+If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
