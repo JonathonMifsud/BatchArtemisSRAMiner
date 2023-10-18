@@ -1,22 +1,31 @@
+# BatchArtemisSRAMiner
 <a href="https://zenodo.org/badge/latestdoi/616299128"><img src="https://zenodo.org/badge/616299128.svg" alt="DOI"></a>
-- [Installation](#installation)
-- [Pipeline](#pipeline)
-- [Other tips](#other-tips)
-  - [Monitoring Job Status](#monitoring-job-status)
-  - [Job Status Shortcut](#job-status-shortcut)
-  - [Common Flags](#common-flags)
-  - [Non-SRA Libraries](#non-sra-libraries)
-  - [Fastqc](#fastqc)
-  - [Storage](#storage)
-- [Troubleshooting](#troubleshooting)
-- [Installing Anaconda](#installing-anaconda)
-- [How to cite this repo?](#how-to-cite-this-repo)
 
 A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a little janky and documentation is a work in progress!
 
 The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
 
 NOTE: This pipeline relies on several databases, modules and taxonomy files that are available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me an email.
+
+
+--------------------
+### Table of Contents
+- [BatchArtemisSRAMiner](#batchartemissraminer)
+    - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Pipeline](#pipeline)
+  - [Other tips](#other-tips)
+    - [Monitoring Job Status](#monitoring-job-status)
+    - [Job Status Shortcut](#job-status-shortcut)
+    - [Common Flags](#common-flags)
+    - [Non-SRA Libraries](#non-sra-libraries)
+    - [Fastqc](#fastqc)
+    - [Storage](#storage)
+  - [Troubleshooting](#troubleshooting)
+  - [Installing Anaconda](#installing-anaconda)
+  - [How to cite this repo?](#how-to-cite-this-repo)
+
+--------------------
 
 ## Installation
 
@@ -36,6 +45,8 @@ Each general task you want to run is associated with a .sh (shell) and .pbs scri
 If you are unsure about what variables/files need to be passed to a script, refer to the .sh script.
 
 The scripts are designed to process batches, so they require a list of filenames to run.
+
+--------------------
 
 ## Pipeline
 The standard pipeline follows these steps:
@@ -57,6 +68,8 @@ E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
 11. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/^your_root_project^/^your_project^/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
+
+--------------------
 
 ## Other tips
 
@@ -118,6 +131,8 @@ If you would like to examine the qc of libraries before and after trimming you c
 
 I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
 
+--------------------
+
 ## Troubleshooting
 
 If your SRA fails, check the error and output logs in the logs folder in the project branch.
@@ -131,6 +146,8 @@ Trimming/Assembly Failure
 The most common cause of trimming/assembly failure is a corrupt download. In this case, it's best to remove, redownload, and reassemble the data.
 
 PBS job rejected from all possible destinations. Make sure you have less than 1000 accessions. Also ensure that you have updated the pipeline to v1.0.1 as there is a mistake in the inital release that results in an invalid walltime being requested. 
+
+--------------------
 
 ## Installing Anaconda
 
@@ -160,6 +177,8 @@ To create the environments run the following. Note the .yml can be found here or
 `conda env create -f /project/^your_root_project^/^your_project^/environments/ccmetagen_env.yml`
 `conda env create -f /project/^your_root_project^/^your_project^/environments/project_pipeline.yml`
 `conda env create -f /project/^your_root_project^/^your_project^/environments/r_env.yml`
+
+--------------------
 
 ## How to cite this repo?
 If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
