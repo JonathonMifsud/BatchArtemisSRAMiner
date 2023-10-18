@@ -72,7 +72,7 @@ if [ "$jPhrase" == "0-0" ]; then
     export jPhrase="0-1"
 fi
 
-qsub -v "project=$project,file_of_accessions=$file_of_accessions" \
+qsub -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -J "$jPhrase" \
     -q "defaultQ" \
     -P "$root_project" \
