@@ -1,4 +1,15 @@
 <a href="https://zenodo.org/badge/latestdoi/616299128"><img src="https://zenodo.org/badge/616299128.svg" alt="DOI"></a>
+- [Installation](#installation)
+- [Pipeline](#pipeline)
+- [Other tips](#other-tips)
+  - [Monitoring Job Status](#monitoring-job-status)
+  - [Job Status Shortcut](#job-status-shortcut)
+  - [Common Flags](#common-flags)
+  - [Non-SRA Libraries](#non-sra-libraries)
+  - [Storage:](#storage)
+- [Troubleshooting](#troubleshooting)
+- [Installing Anaconda](#installing-anaconda)
+- [How to cite this repo?](#how-to-cite-this-repo)
 
 A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a little janky and documentation is a work in progress!
 
@@ -28,21 +39,25 @@ The scripts are designed to process batches, so they require a list of filenames
 ## Pipeline
 The standard pipeline follows these steps:
 
-1. Download SRA e.g, `JCOM_pipeline_download_sra.sh` Note all the scripts will be renamed to reflect your project name. This can be skipped if you have generated the sequencing data yourself (!see section Non-SRA libaries)
-2. Check the that the raw reads have downloaded by looking in `/scratch/your_root/your_project/raw_reads` . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
-3. Run read trimming, assembly and calculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`. Trimming is currently setup for TruSeq3 PE and SE illumania libs and will also trim nextera 
-4. Check that all contigs are non-zero in size in `/project/your_root/your_project/contigs/final_contigs/`
-6. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
-7. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
+![Pipeline](docs/images/pipeline_schematic.drawio.png)
+
+1. Create an accession file, plain text with the names of your libaries, one per line. These can either be SRA run ids or Non-SRA libaries (!see section Non-SRA libaries). This will be used as the main input for the scripts.
+2. Download SRA e.g, `_pipeline_download_sra.sh` Note all the scripts will be renamed to reflect your project name. This can be skipped if you have generated the sequencing data yourself 
+3. Check the that the raw reads have downloaded by looking in `/scratch/^your_root_project^/^your_project^/raw_reads` . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
+4. Run read trimming, assembly and calculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`. Trimming is currently setup for TruSeq3 PE and SE illumania libs and will also trim nextera. Check that all contigs are non-zero in size in `/project/^your_root_project^/^your_project^/contigs/final_contigs/`
+5. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
+6. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
 The reason I do this is that it is expensive to run NT / NR blasts for each contig file because the giant databases have to be loaded in each time. Instead you concatentate all of the blast contigs together and run it once. 
 E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
-8. Move `combined.contigs.fa` to the `/project/your_root/your_project/contigs/final_contigs/` i.e. the input location for blasts. 
-9. Create an input accession file containing a single line with the word `combined` 
-10. Run blastnr and blastnt using this input file. As you are running this on the combined contigs there should only be one subjob in the array! `JCOM_pipeline_blastnr.sh` `JCOM_pipeline_blastnt.sh`
-11. Run the readcount script `JCOM_pipeline_readcount.sh`
-12. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/your_root/your_project/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
+7. Move `combined.contigs.fa` to the `/project/^your_root_project^/^your_project^/contigs/final_contigs/` i.e. the input location for blasts. 
+8. Create an input accession file containing a single line with the word `combined` 
+9. Run blastnr and blastnt using this input file. As you are running this on the combined contigs there should only be one subjob in the array! `JCOM_pipeline_blastnr.sh` `JCOM_pipeline_blastnt.sh`
+10. Run the readcount script `JCOM_pipeline_readcount.sh`
+11. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/^your_root_project^/^your_project^/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
+
+## Other tips
 
 ### Monitoring Job Status
 
@@ -51,11 +66,11 @@ You can check the status of a job using `qstat -u USERNAME`. This will show you 
 ### Job Status Shortcut
 Replace jmif9945 with your unikey and run the following line to create an alias for `q`. This will display two panels: the top panel shows the last 100 jobs/subjobs, while the bottom panel provides a summary of batch jobs:
 
-`alias q="qstat -Jtan1 -xu jmif9945 | tail -n100; qstat -u jmif9945"`
+`alias q="qstat -Jtan1 -xu ^your_username^ | tail -n100; qstat -u ^your_username^"`
 Enter q to check the job status. If you want to make this alias permanent, add it to your .bashrc file:
 
 `nano ~/.bashrc`
-Add the line: `alias q="qstat -Jtan1 -xu jmif9945 | tail -n100; qstat -u jmif9945"`
+Add the line: `alias q="qstat -Jtan1 -xu ^your_username^ | tail -n100; qstat -u ^your_username^"`
 
 Then to load it: `source ~/.bashrc`
 
@@ -87,6 +102,16 @@ There may be cases where you want to run these functions in directories outside 
 
 You only need to specify -p or -r if you are going outside of the directory stucture in which the setup.sh was ran for. 
 
+### Non-SRA Libraries
+
+You can also use the script with non-SRA libraries by cleaning the original raw read names. For example, `hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC`
+
+E.g., hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC_L002_R1.fastq.gz -> hpv3t10_1.fastq.gz
+The main thing is that underscores are only used to seperate the ID (hpv3t10) and the read file direction (1) and that the "R" in R1/2 is remove. 
+
+### Storage:
+I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
+
 ## Troubleshooting
 
 If your SRA fails, check the error and output logs in the logs folder in the project branch.
@@ -99,12 +124,7 @@ Other reasons for download failure could be invalid SRA run id or insufficient s
 Trimming/Assembly Failure
 The most common cause of trimming/assembly failure is a corrupt download. In this case, it's best to remove, redownload, and reassemble the data.
 
-### Non-SRA Libraries
-
-You can also use the script with non-SRA libraries by cleaning the original raw read names. For example, `hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC`
-
-E.g., hope_valley3_10_HWGFMDSX5_CCTGCAACCT-CTGACTCTAC_L002_R1.fastq.gz -> hpv3t10_1.fastq.gz
-The main thing is that underscores are only used to seperate the ID (hpv3t10) and the read file direction (1) and that the "R" in R1/2 is remove. 
+PBS job rejected from all possible destinations. Make sure you have less than 1000 accessions. Also ensure that you have updated the pipeline to v1.0.1 as there is a mistake in the inital release that results in an invalid walltime being requested. 
 
 ## Installing Anaconda
 
@@ -119,7 +139,7 @@ Press ENTER to continue and review the license agreement. Press `ENTER` again to
 
 The installer will prompt you for the location of the installation. As there is very limited space in your home directory (e.g., /home/jmif9945/) installing Anaconda here isn't a great idea. Instead install it in your main project home directory by specifying the path:
 For example:
-`/project/jcomvirome/anaconda3`
+`/project/^your_root_project^/anaconda3`
 You can press `ENTER` to accept.
 
 At the end of the installation, you'll be asked if you want to run conda init. We recommend saying `yes` to this option. This will make Anaconda usable from any terminal session.
@@ -128,16 +148,12 @@ Activate Installation
 Close and re-open your terminal. You should now have access to the conda command.
 
 Conda will sometimes require more memory than the head node can provide causing memory issues when running `conda install` or `conda env create`. To get around this we can create a interactive environment using the following:
-`qsub -I -l select=1:ncpus=4:mem=20GB -l walltime=4:00:00 -M jmif9945@uni.sydney.edu.au -P VELAB -q defaultQ  -j oe`
+`qsub -I -l select=1:ncpus=4:mem=20GB -l walltime=4:00:00 -M ^your_email^@uni.sydney.edu.au -P ^your_root_project^ -q defaultQ  -j oe`
 
 To create the environments run the following. Note the .yml can be found here or in the environments folder in your main dir (same level as the scripts / blast_results)
-`conda env create -f /project/VELAB/jcom_pipeline_taxonomy/ccmetagen_env.yml`
-`conda env create -f /project/VELAB/jcom_pipeline_taxonomy/project_pipeline.yml`
-`conda env create -f /project/VELAB/jcom_pipeline_taxonomy/r_env.yml`
+`conda env create -f /project/^your_root_project^/^your_project^/environments/ccmetagen_env.yml`
+`conda env create -f /project/^your_root_project^/^your_project^/environments/project_pipeline.yml`
+`conda env create -f /project/^your_root_project^/^your_project^/environments/r_env.yml`
 
-
-### Storage:
-I tend to delete the raw and trimmed read files after contigs are the trim_assembly_abundance script has completed as abundance and read count (make sure to run this!) information has been calculated at this stage. Once the summary table is created there are a couple large files in this directory including the concatentated abundance table. This can be remade so consider removing this if you are low on storage. 
-
-### How to cite this repo?
+## How to cite this repo?
 If this repo was somehow useful a citation would be greatly appeciated! The best way to get a reference file is to click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
