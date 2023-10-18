@@ -6,6 +6,8 @@
 ###############################################################################################################
 
 # shell wrapper script to run fastqc for project folder
+# This script takes an -f flag and using the id will run fastqc for the raw and trimmed (including removed reads)
+
 
 # Set the default values
 queue="defaultQ"
@@ -54,10 +56,8 @@ if [ "$root_project" = "" ]; then
 fi
 
 if [ "$file_of_accessions" = "" ]; then
-    echo "No file containing files to run specified running all files in /scratch/$root_project/$project/raw_reads/ and /scratch/$root_project/$project/trimmed_files/"
-    ls -d /scratch/"$root_project"/"$project"/raw_reads/*.fastq.gz >/scratch/"$root_project"/"$project"/raw_reads/file_of_accessions
-    ls -d /scratch/"$root_project"/"$project"/trimmed_reads/*.fastq.gz >>/scratch/"$root_project"/"$project"/raw_reads/file_of_accessions
-    export file_of_accessions="/scratch/$root_project/$project/raw_reads/file_of_accessions"
+    echo "No file containing files to run please specify this with -f"
+    exit 1
 else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi
@@ -74,7 +74,8 @@ fi
 
 qsub -v "project=$project,file_of_accessions=$file_of_accessions" \
     -J "$jPhrase" \
-    -q "$queue" \
-    -o "/project/$root_project/$project/logs/fastqc_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/fastqc_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+    -q "defaultQ" \
+    -P "$root_project" \
+    -o "/project/$root_project/$project/logs/fastqc_^array_index^_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/fastqc_^array_index^_$(date '+%Y%m%d')_stderr.txt" \
     /project/$root_project/$project/scripts/JCOM_pipeline_fastqc.pbs

@@ -5,10 +5,9 @@
 #                                                   2023                                                      # 
 ###############################################################################################################
 
-#PBS -P RDS-FSC-VELAB-RW
 #PBS -N fastqc
-#PBS -l select=1:ncpus=12:mem=120GB
-#PBS -l walltime=48:00:00
+#PBS -l select=1:ncpus=4:mem=30GB
+#PBS -l walltime=12:00:00
 #PBS -M jmif9945@uni.sydney.edu.au
 #PBS -m abe
 
@@ -16,10 +15,38 @@ module load fastqc/0.11.8
 cd /project/"$root_project"/"$project"/fastqc || exit
 
 readarray -t myarray < "$file_of_accessions"
-export library_run=${myarray["$PBS_ARRAY_INDEX"]}
+export library_id=${myarray["$PBS_ARRAY_INDEX"]}
 
-fastqc "$library_run" \
+# Check raw reads
+fastqc /scratch/"$root_project"/"$project"/raw_reads/"$library_id"_1.fastq.gz \
     --format fastq \
-    --threads 12 \
+    --threads 4 \
     --outdir /project/"$root_project"/"$project"/fastqc
+
+fastqc /scratch/"$root_project"/"$project"/raw_reads/"$library_id"_2.fastq.gz \
+    --format fastq \
+    --threads 4 \
+    --outdir /project/"$root_project"/"$project"/fastqc
+
+# Check trimmed reads and removed reads
+fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R1.fastq.gz \
+    --format fastq \
+    --threads 4 \
+    --outdir /project/"$root_project"/"$project"/fastqc
+
+fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R2.fastq.gz \
+    --format fastq \
+    --threads 4 \
+    --outdir /project/"$root_project"/"$project"/fastqc
+
+fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R1.fastq.gz \
+    --format fastq \
+    --threads 4 \
+    --outdir /project/"$root_project"/"$project"/fastqc
+
+fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R2.fastq.gz \
+    --format fastq \
+    --threads 4 \
+    --outdir /project/"$root_project"/"$project"/fastqc
+
 
