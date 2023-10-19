@@ -82,7 +82,7 @@ fi
 
 # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
 if [ "$queue" = "defaultQ" ]; then
-    job_time="walltime=48:00:00"
+    job_time="walltime=120:00:00"
     queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
     cpu="ncpus=24"
     mem="mem=220GB"
