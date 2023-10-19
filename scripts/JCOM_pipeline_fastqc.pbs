@@ -1,9 +1,17 @@
 #!/bin/bash
 ###############################################################################################################
-#                                            BatchArtemisSRAMiner                                             #   
-#                                                JCO Mifsud                                                   # 
-#                                                   2023                                                      # 
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2023                                                      #
 ###############################################################################################################
+# This script takes an -f flag and using the id will run fastqc for the raw and trimmed (including removed reads)
+# examine accessions file:
+# SRR931704
+# SRR931705
+# SRR931706
+# mylib1
+# mylib2
+
 
 #PBS -N fastqc
 #PBS -l select=1:ncpus=4:mem=30GB
@@ -11,42 +19,61 @@
 #PBS -M jmif9945@uni.sydney.edu.au
 #PBS -m abe
 
+# Load the FastQC module
 module load fastqc/0.11.8
+
+# Set the working directory for the output
 cd /project/"$root_project"/"$project"/fastqc || exit
+inpath=/scratch/"$root_project"/"$project"/trimmed_reads
 
-readarray -t myarray < "$file_of_accessions"
-export library_id=${myarray["$PBS_ARRAY_INDEX"]}
+# Function to run FastQC
+run_fastqc() {
+    local input_file="$1"
+    local output_dir="$2"
 
-# Check raw reads
-fastqc /scratch/"$root_project"/"$project"/raw_reads/"$library_id"_1.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+    # Run FastQC on the input file and place the results in the specified output directory
+    fastqc "$input_file" --format fastq --threads 4 --outdir "$output_dir"
+}
 
-fastqc /scratch/"$root_project"/"$project"/raw_reads/"$library_id"_2.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+# Read accession IDs from a file into an array
+readarray -t myarray <"$file_of_accessions"
 
-# Check trimmed reads and removed reads
-fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R1.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+# Select a library run from the array based on the PBS_ARRAY_INDEX
+export library_run="${myarray["$PBS_ARRAY_INDEX"]}"
 
-fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R2.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+# Extract the library ID without the path
+library_run_without_path="$(basename -- "$library_run")"
 
-fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R1.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+# Remove '.fastq.gz' and underscores from the library ID to get a clean ID
+library_id=$(echo "$library_run_without_path" | sed 's/\.fastq.gz//g' | sed 's/_*//g')
 
-fastqc /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R2.fastq.gz \
-    --format fastq \
-    --threads 4 \
-    --outdir /project/"$root_project"/"$project"/fastqc
+# Determine the layout based on the presence of files in the trimmed_reads directory
+if [ -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ ! -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="single"
+fi
 
+if [ ! -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="paired"
+fi
 
+if [ -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="paired"
+fi
+
+# Run FastQC based on layout
+if [[ "$layout" == "single" ]]; then
+    # Run FastQC for single layout on raw, trimmed, and removed files
+    run_fastqc "/scratch/$root_project/$project/raw_reads/$library_id.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_trimmed.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_removed.fastq.gz" .
+fi
+
+if [[ "$layout" == "paired" ]]; then
+    # Run FastQC for paired layout on raw and trimmed files for both R1 and R2
+    run_fastqc "/scratch/$root_project/$project/raw_reads/$library_id""_1.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/raw_reads/$library_id""_2.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_trimmed_R1.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_trimmed_R2.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_removed_R1.fastq.gz" .
+    run_fastqc "/scratch/$root_project/$project/trimmed_reads/$library_id""_removed_R2.fastq.gz" .
+fi

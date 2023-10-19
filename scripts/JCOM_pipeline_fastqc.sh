@@ -7,7 +7,12 @@
 
 # shell wrapper script to run fastqc for project folder
 # This script takes an -f flag and using the id will run fastqc for the raw and trimmed (including removed reads)
-
+# examine accessions file:
+# SRR931704
+# SRR931705
+# SRR931706
+# mylib1
+# mylib2
 
 # Set the default values
 queue="defaultQ"
@@ -56,7 +61,7 @@ if [ "$root_project" = "" ]; then
 fi
 
 if [ "$file_of_accessions" = "" ]; then
-    echo "No file containing files to run please specify this with -f"
+    echo "No accession file containing library ids to run please specify this with -f"
     exit 1
 else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
