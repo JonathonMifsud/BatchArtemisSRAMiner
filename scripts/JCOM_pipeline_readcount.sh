@@ -5,8 +5,6 @@
 #                                                   2023                                                      #
 ###############################################################################################################
 
-# shell wrapper script to run read count getter for project folder. Note this is run in trim_assembly_assemble script by default
-# if you are providing files include both the left and right file
 
 # Set the default values
 queue="defaultQ"
@@ -58,10 +56,8 @@ if [ "$root_project" = "" ]; then
 fi
 
 if [ "$file_of_accessions" = "" ]; then
-    echo "No file containing files to run specified running all files in /scratch/$root_project/$project/trimmed_reads/"
-    ls -d /scratch/"$root_project"/"$project"/trimmed_reads/*_trimmed*.fastq.gz >/scratch/"$root_project"/"$project"/raw_reads/file_of_accessions_for_readcount
-    sed -i --posix '/.*trimmed_R2.fastq.gz/d' /scratch/"$root_project"/"$project"/raw_reads/file_of_accessions_for_readcount
-    export file_of_accessions="/scratch/$root_project/$project/raw_reads/file_of_accessions_for_readcount"
+    echo "No accession file containing library ids to run please specify this with -f"
+    exit 1
 else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi

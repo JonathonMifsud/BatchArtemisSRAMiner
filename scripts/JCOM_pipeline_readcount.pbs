@@ -5,6 +5,11 @@
 #                                                   2023                                                      #
 ###############################################################################################################
 
+# This function will go the the trimmed files, create an unzipped copy and calculate the read count
+# Results are appended to a file named project_accessions_reads
+# input: file_of_accessions (-f)
+# output: project_accessions_reads
+
 #PBS -N unzip_and_get_read_count
 #PBS -l select=1:ncpus=4:mem=20GB
 #PBS -M jmif9945@uni.sydney.edu.au
@@ -22,22 +27,78 @@ readarray -t myarray <"$file_of_accessions"
 # Get the corresponding line from the array based on the PBS_ARRAY_INDEX
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 
-# Remove .gz from the end of library_run
-new_name=${library_run%".gz"}
+# Extract the library ID without the path
+library_run_without_path="$(basename -- "$library_run")"
 
-# Extract the basename of new_name
-library_id="$(basename -- $new_name)"
+# Remove '.fastq.gz' and underscores from the library ID to get a clean ID
+library_id=$(echo "$library_run_without_path" | sed 's/\.fastq.gz//g' | sed 's/_*//g')
 
-# Unzip the gzipped file and write the contents to new_name. If this fails, exit the script.
-gunzip -c "$library_run" >"$new_name" || {
-    echo "Failed to unzip $library_run"
-    exit 1
-}
+inpath=/scratch/"$root_project"/"$project"/trimmed_reads
 
-# Calculate the read count by dividing the total number of lines in the file by 4 (since each read in FASTQ format consists of 4 lines)
-# The -n option with echo is used to prevent adding a new line
-# The result is appended to a file named project_accessions_reads
-echo -n "$library_id"","$(echo $(cat $new_name | wc -l)/4 | bc)"\n" >>/project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
+# Determine the layout based on the presence of files in the trimmed_reads directory
+if [ -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ ! -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="single"
+fi
 
-# Remove the unzipped file to save space. If this fails, print an error message but do not exit the script.
-rm "$new_name" || echo "Failed to remove $new_name"
+if [ ! -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="paired"
+fi
+
+if [ -f "$inpath"/"$library_id""_trimmed.fastq.gz" ] && [ -f "$inpath"/"$library_id""_trimmed_R1.fastq.gz" ]; then
+    export layout="paired"
+fi
+
+if [[ "$layout" == "single" ]]; then
+    # Remove .gz from the end
+    old_name="$library_id""_trimmed.fastq.gz"
+    new_name=${old_name%".gz"}
+
+    # Unzip the gzipped file and write the contents to new_name. If this fails, exit the script.
+    gunzip -c "$inpath"/"$old_name" >"$inpath"/"$new_name" || {
+        echo "Failed to unzip $library_run"
+        exit 1
+    }
+
+    # Calculate the read count by dividing the total number of lines in the file by 4 (since each read in FASTQ format consists of 4 lines)
+    # The -n option with echo is used to prevent adding a new line
+    # The result is appended to a file named project_accessions_reads
+    echo -n "$library_id""_trimmed.fastq"","$(echo $(cat "$inpath"/$new_name | wc -l)/4 | bc)"\n" >>/project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
+fi
+
+if [[ "$layout" == "paired" ]]; then
+
+    # UNZIP AND GET READ COUNT FOR R1
+    # Remove .gz from the end
+    old_name="$library_id""_trimmed_R1.fastq.gz"
+    new_name=${old_name%".gz"}
+
+    # Unzip the gzipped file and write the contents to new_name. If this fails, exit the script.
+    gunzip -c "$inpath"/"$old_name" >"$inpath"/"$new_name" || {
+        echo "Failed to unzip $library_run"
+        exit 1
+    }
+
+    # Calculate the read count by dividing the total number of lines in the file by 4 (since each read in FASTQ format consists of 4 lines)
+    # The -n option with echo is used to prevent adding a new line
+    # The result is appended to a file named project_accessions_reads
+    echo -n "$library_id""_trimmed_R1.fastq"","$(echo $(cat "$inpath"/$new_name | wc -l)/4 | bc)"\n" >>/project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
+
+    # UNZIP AND GET READ COUNT FOR R2
+    # Remove .gz from the end
+    old_name="$library_id""_trimmed_R2.fastq.gz"
+    new_name=${old_name%".gz"}
+
+    # Unzip the gzipped file and write the contents to new_name. If this fails, exit the script.
+    gunzip -c "$inpath"/"$old_name" >"$inpath"/"$new_name" || {
+        echo "Failed to unzip $library_run"
+        exit 1
+    }
+
+    # Calculate the read count by dividing the total number of lines in the file by 4 (since each read in FASTQ format consists of 4 lines)
+    # The -n option with echo is used to prevent adding a new line
+    # The result is appended to a file named project_accessions_reads
+    echo -n "$library_id""_trimmed_R2.fastq"","$(echo $(cat "$inpath"/$new_name | wc -l)/4 | bc)"\n" >>/project/"$root_project"/"$project"/read_count/"$project"_accessions_reads
+    # Remove the unzipped file to save space. If this fails, print an error message but do not exit the script.
+    rm "$inpath"/"$new_name" || echo "Failed to remove $new_name"
+
+fi
