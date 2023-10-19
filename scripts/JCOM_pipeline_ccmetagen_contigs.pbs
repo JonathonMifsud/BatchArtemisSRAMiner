@@ -34,7 +34,7 @@ db=/scratch/VELAB/db_kma/ncbi_nt_no_env_11jun2019
 cd "$wd" || exit
 
 # Map reads to database with kma
-kma -i "$inpath"/"$library_run" \
+kma -i "$inpath"/"$library_id".contigs.fa \
     -o "$outpath"/"$library_id"_out_kma \
     -t_db "$db" \
     -t "$threads" \

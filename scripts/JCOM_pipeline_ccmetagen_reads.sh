@@ -55,30 +55,12 @@ if [ "$root_project" = "" ]; then
     exit 1
 fi
 
-# Check if file containing file names/accessions is provided
-if [ -z "$file_of_accessions" ]; then
-    echo "No file containing files to run specified. Running all files in /project/$root_project/$project/contigs/final_contigs/"
-    ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa >/project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_ccmetagen
-    export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_ccmetagen"
-else
+if [ "$file_of_accessions" = "" ]; then
+    echo "No accession list provided, please specify this with (-f)"
+    exit 1
+    else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi
-
-# Determine the job time and queue project based on the queue type
-case "$queue" in
-"defaultQ" | "alloc-eh")
-    job_time="walltime=84:00:00"
-    queue_project="$root_project"
-    ;;
-"scavenger")
-    job_time="walltime=48:00:00"
-    queue_project="$root_project"
-    ;;
-*)
-    echo "Invalid queue type. Please specify either 'defaultQ', 'scavenger', or 'alloc-eh'"
-    exit 1
-    ;;
-esac
 
 # Determine the number of jobs needed from the length of input and format the J phrase for the pbs script
 jMax=$(wc -l <"$file_of_accessions")
@@ -95,6 +77,6 @@ qsub -J "$jPhrase" \
     -e "/project/$root_project/$project/logs/ccmetagen_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
     -q "$queue" \
-    -l "$job_time" \
-    -P "$queue_project" \
+    -l "walltime=84:00:00" \
+    -P "$root_project" \
     /project/"$root_project"/"$project"/scripts/JCOM_pipeline_ccmetagen_reads.pbs
