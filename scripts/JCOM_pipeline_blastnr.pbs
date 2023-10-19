@@ -16,7 +16,7 @@
 
 ##load modules
 module load blast+
-module load diamond
+module load diamond/2.1.6
 
 # blastx
 function BlastxNR {

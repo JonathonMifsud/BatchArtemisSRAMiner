@@ -15,7 +15,7 @@
 
 ##load modules
 module load blast
-module load diamond/2.0.9
+module load diamond/2.1.6
 
 db_basename=$(basename "$db")
 
