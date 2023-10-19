@@ -72,9 +72,8 @@ if [ "$db" = "" ]; then
 fi
 
 if [ "$file_of_accessions" = "" ]; then
-    echo "No file containing files to run specified running all files in /project/$root_project/$project/contigs/final_contigs/"
-    ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa >/project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_blastNT
-    export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_blastNT"
+    echo "No accession file containing files to run specified, please specify this with -f"
+    exit 1
 else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi
