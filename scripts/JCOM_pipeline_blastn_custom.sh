@@ -19,16 +19,18 @@ root_project="jcomvirome"
 show_help() {
     echo "Usage: $0 [-i input] [-d db] [-h]"
     echo "  -i input: Input fasta file to blast, provide the full path. (Required)"
-    echo "  -d db: Database for blastx. (Required)"
+    echo "  -d db: Blast+ database for blastn. (Required)"
     echo "  -h: Display this help message."
     echo ""
     echo "  Example:"
-    echo "  $0 -i /path/to/input/mylib.contigs.fa -d /path/to/blast/db.dmnd"
+    echo "  $0 -i /project/$root_project/$project/contigs/final_contigs/mylib.contigs.fa -d /scratch/VELAB/Databases/Blast/nt.^MONTH^-^YEAR^/nt"
     echo ""
+    echo " Check the Github page for more information:"
+    echo " https://github.com/JonathonMifsud/BatchArtemisSRAMiner "
     exit 1
 }
 
-while getopts "i:d:p:r:h:" 'OPTKEY'; do
+while getopts "i:d:p:r:h" 'OPTKEY'; do
     case "$OPTKEY" in
     'i')
         #
@@ -54,46 +56,41 @@ while getopts "i:d:p:r:h:" 'OPTKEY'; do
         echo "INVALID OPTION -- ${OPTARG}" >&2
         echo ""
         show_help
-        exit 1
         ;;
     ':')
         echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
         echo ""
         show_help
-        exit 1
         ;;
     *)
         # Handle invalid flags here
         echo "Invalid option: -$OPTARG" >&2
         echo ""
         show_help
-        exit 1
         ;;    
     esac
 done
 shift $((OPTIND - 1))
 
 if [ "$input" = "" ]; then
-    echo "No input string entered."
+    echo "ERROR: No input string entered."
     echo ""
     show_help
-    exit 1
 fi
 
 if [ "$db" = "" ]; then
-    echo "No database specified. Use -d option to specify the database. e.g., -d /scratch/VELAB/Databases/Blast/nt.Jul-2023/nt"
+    echo "ERROR: No database specified. Use -d option to specify the database. e.g., -d /scratch/VELAB/Databases/Blast/nt.Jul-2023/nt"
     echo ""
     show_help
-    exit 1
 fi
 
 if [ "$project" = "" ]; then
-    echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    echo "ERROR: No project string entered. Use e.g, -p JCOM_pipeline_virome"
     exit 1
 fi
 
 if [ "$root_project" = "" ]; then
-    echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    echo "ERROR: No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
     exit 1
 fi
 

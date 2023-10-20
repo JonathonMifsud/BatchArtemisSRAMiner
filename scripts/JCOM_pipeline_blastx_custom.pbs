@@ -8,8 +8,8 @@
 # script to blastx and extract positive virus contigs
 
 #PBS -N blastx_custom_array
-#PBS -l select=1:ncpus=6:mem=20GB
-#PBS -l walltime=24:00:00
+#PBS -l select=1:ncpus=12:mem=120GB
+#PBS -l walltime=48:00:00
 #PBS -M jmif9945@uni.sydney.edu.auß
 #PBS -m abe
 
@@ -39,7 +39,7 @@ library_id="$(basename -- $input)"
 cd "$wd" || exit
 outpath="$wd"
 tempdir="$wd"
-CPU=6
+CPU=10
 MEM=2
 
 Blastx

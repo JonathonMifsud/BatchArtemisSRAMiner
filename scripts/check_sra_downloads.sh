@@ -10,7 +10,25 @@
 # It also looks to see if both paired end files are present for each SRA
 # And removes the pesky third file that is not useful - atleast with my understanding of it
 
-while getopts "d:f:" 'OPTKEY'; do
+# Set the default values
+project="JCOM_pipeline_virome"
+root_project="jcomvirome"
+
+show_help() {
+    echo "Usage: $0 [-f file_of_accessions] [-d directory] [-h]"
+    echo "  -f file_of_accessions: Full path to text file containing library ids (i.e., SRA run ids), one per line (Required)"
+    echo "  -d directory: Directory containing the raw sequence files (Required)"
+    echo "  -h: Display this help message."
+    echo ""
+    echo "  Example:"
+    echo "  $0 -f /project/$root_project/$project/accession_lists/mylibs.txt -d /scratch/$root_project/$project/raw_reads"
+    echo ""
+    echo " Check the Github page for more information:"
+    echo " https://github.com/JonathonMifsud/BatchArtemisSRAMiner "
+    exit 1
+}
+
+while getopts "d:f:h" 'OPTKEY'; do
     case "$OPTKEY" in
     'd')
         # dir containing the raw sequence files
@@ -20,10 +38,13 @@ while getopts "d:f:" 'OPTKEY'; do
         # text file containing the SRA accessions that should be downloaded used to cross reference files in the directory
         file_of_accessions="$OPTARG"
         ;;
+    'h')
+        show_help
+        ;;    
     *)
         # Handle invalid flags here
         echo "Invalid option: -$OPTARG" >&2
-        exit 1
+        show_help
         ;;
     esac
 done
@@ -31,13 +52,15 @@ done
 shift $((OPTIND - 1))
 
 if [ "$directory" = "" ]; then
-    echo "No directory string entered. Use -d to specify the FULL PATH to the directory containing raw sequence files"
-    exit 1
+    echo "ERROR: No directory string entered. Use -d to specify the FULL PATH to the directory containing raw sequence files"
+    echo ""
+    show_help
 fi
 
 if [ "$file_of_accessions" = "" ]; then
-    echo "No file containing SRA to run specified. Use -f file containing SRA accessions"
-    exit 1
+    echo "ERROR: No file containing SRA to run specified. Use -f file containing SRA accessions"
+    echo ""
+    show_help
 fi
 
 # Get a list of all of the SRA ids in the current directory
