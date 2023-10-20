@@ -42,7 +42,7 @@ https://www.ibm.com/aspera/connect/
 
 Each general task you want to run is associated with a .sh (shell) and .pbs script. The .sh script works as a wrapper, passing parameters and variables to the .pbs script. After setting up, you usually don't need to edit the .pbs script.
 
-If you are unsure about what variables/files need to be passed to a script, refer to the .sh script.
+If you are unsure about what variables/files to use just call the help flag `-h` e.g., `_pipeline_download_sra.sh -h` (from verison 1.0.4 onwards)
 
 The scripts are designed to process batches, so they require a list of filenames to run.
 
@@ -99,7 +99,9 @@ Then to load it: `source ~/.bashrc`
 
 ### Common Flags
 
-Note: Flags can vary between scripts, so always check the individual `.sh` scripts. However, the common flags are as follows:
+Note: Flags can vary between scripts, If you are unsure about what variables/files to use just call the help flag `-h` e.g., `_pipeline_download_sra.sh -h` (from verison 1.0.4 onwards)
+
+However, the common flags are as follows:
 
 `-f` used to specify a file that contains the SRA run accessions to be processed. This option is followed by a string containing the complete path to a file containing accessions one per line. I typically store these files in `/project/your_root/your_project/accession_lists/`. If this option is not provided, most of the scripts in the pipeline will fail or excetue other behaviours (e.g., see the -f in `trim_assembly_abundance.sh`), as such I always recommmend setting the -f where able so you can better keep track of the libraries you are running. NOTE: The max number of SRAs I would put in a accession file is 1000. If you have more than this create two files and run the download_script twice. The limit is enforced by Artemis/PBS. 
 
@@ -181,4 +183,4 @@ To create the environments run the following:
 --------------------
 
 ## How to cite this repo?
-If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
+If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. doi:10.5281/zenodo.8417950 Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
