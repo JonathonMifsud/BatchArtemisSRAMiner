@@ -58,14 +58,9 @@ The standard pipeline follows these steps:
 3. Check the that the raw reads have downloaded by looking in `/scratch/^your_root_project^/^your_project^/raw_reads` . You can use the `check_sra_downloads.sh` script to do this! Re-download any that are missing (make a new file with the accessions) 
 4. Run read trimming, assembly and calculate contig abundance e.g, `JCOM_pipeline_trim_assembly_abundance.sh`. Trimming is currently setup for TruSeq3 PE and SE illumania libs and will also trim nextera. Check that all contigs are non-zero in size in `/project/^your_root_project^/^your_project^/contigs/final_contigs/`
 5. Run blastxRdRp and blastxRVDB (these can be run simultaneously)
-6. Concatenate all the RVDB and RdRp contigs across all libraries using cat, etc.
-The reason I do this is that it is expensive to run NT / NR blasts for each contig file because the giant databases have to be loaded in each time. Instead you concatentate all of the blast contigs together and run it once. 
-E.g, `cat *_blastcontigs.fasta > combined.contigs.fa`
-7. Move `combined.contigs.fa` to the `/project/^your_root_project^/^your_project^/contigs/final_contigs/` i.e. the input location for blasts. 
-8. Create an input accession file containing a single line with the word `combined` 
-9. Run blastnr and blastnt using this input file. As you are running this on the combined contigs there should only be one subjob in the array! `JCOM_pipeline_blastnr.sh` `JCOM_pipeline_blastnt.sh`
-10. Run the readcount script `JCOM_pipeline_readcount.sh`
-11. Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/^your_root_project^/^your_project^/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
+6. Run blastnr and blastnt (these can be run simultaneously). Given an accession file this command will combine the blastcontigs from RdRp and RVDB and use it as input for nr and nt. As such you will notice there is only a single job ran for each instead of an array `JCOM_pipeline_blastnr.sh` `JCOM_pipeline_blastnt.sh`. Output is named after the -f file.
+7.  Run the readcount script `JCOM_pipeline_readcount.sh`
+8.  Generate a summary table (Anaconda is needed - see below). The summary table script will create several files inside `/project/^your_root_project^/^your_project^/blast_results/summary_table_creation`. The csv files are the summary tables - if another format or summary would suit you best let me know and we can sit down and develop it. You can specify accessions if you only want to run the summary table on a subset of runs -f as normal. IMPORTANT check both the logs files generated in the logs folder `summary_table_creation_TODAY_stderr.txt` and `summary_table_creation_TODAY_stout.txt` as this will let you know if any of the inputs were missing etc. 
 
 The large files e.g., raw and trimmed reads and abundance files are stored in `/scratch/` while the smaller files tend to be in /project/
 
