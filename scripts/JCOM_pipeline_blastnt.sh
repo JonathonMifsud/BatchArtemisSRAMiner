@@ -122,19 +122,8 @@ if [ "$queue" = "intensive" ]; then
     blast_para="-max_target_seqs 10 -num_threads $cpu -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'"
 fi
 
-#lets work out how many jobs we need from the length of input and format the J phrase for the pbs script
-jMax=$(wc -l <$file_of_accessions)
-jIndex=$(expr $jMax - 1)
-jPhrase="0-""$jIndex"
-
-# if input is of length 1 this will result in an error as J will equal 0-0. We will do a dirty fix and run it as 0-1 which will create an empty second job that will fail.
-if [ "$jPhrase" == "0-0" ]; then
-    export jPhrase="0-1"
-fi
-
-qsub -J $jPhrase \
-    -o "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastnt_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
+qsub -o "/project/$root_project/$project/logs/blastnt_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastnt_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,blast_para=$blast_para,cpu=$cpu,db=$db" \
     -q "$queue" \
     -l "$job_time" \

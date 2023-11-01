@@ -120,20 +120,9 @@ if [ "$queue" = "intensive" ]; then
     diamond_para="-e 1E-4 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k5 --tmpdir /scratch/$root_project/"
 fi
 
-#lets work out how many jobs we need from the length of input and format the J phrase for the pbs script
-jMax=$(wc -l <$file_of_accessions)
-jIndex=$(expr $jMax - 1)
-jPhrase="0-""$jIndex"
-
-# if input is of length 1 this will result in an error as J will equal 0-0. We will do a dirty fix and run it as 0-1 which will create an empty second job that will fail.
-if [ "$jPhrase" == "0-0" ]; then
-    export jPhrase="0-1"
-fi
-
 # Run the blastx jobs
-qsub -J "$jPhrase" \
-    -o "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
+qsub -o "/project/$root_project/$project/logs/blastnr_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastnr_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,diamond_para=$diamond_para,db=$db" \
     -q "$queue" \
     -l "$job_time" \
