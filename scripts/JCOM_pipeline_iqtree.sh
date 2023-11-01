@@ -18,7 +18,7 @@ show_help() {
     echo ""
     echo "Usage: $0 [-i alignment] [-m model] [-h]"
     echo "  -i alignment: sequence alignment to build tree from, provide the full path. (Required)"
-    echo "  -m model: substitution model to use, leave blank for ModelFinder."
+    echo "  -m model: substitution model to use, leave blank for ModelFinder. (Optional)"
     echo "  -h: Display this help message."
     echo ""
     echo "  Example:"
