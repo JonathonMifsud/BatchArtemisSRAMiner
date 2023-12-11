@@ -181,4 +181,4 @@ To create the environments run the following. Note the .yml can be found here or
 --------------------
 
 ## How to cite this repo?
-If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
+If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, J.C.O. (2023) BatchArtemisSRAMiner v1.X.X. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
