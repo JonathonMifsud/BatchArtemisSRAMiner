@@ -238,7 +238,6 @@ function createSummaryTable() {
             while IFS= read -r accession; do
                 echo "Accession: $accession"
                 filtered_data["$accession"]=$(awk -v accession="$accession" '$0 ~ accession' "$input_file")
-                echo "Filtered data for accession '$accession': ${filtered_data["$accession"]}"
             done <"$subset_file"
 
             # Write filtered data to separate files
@@ -332,7 +331,7 @@ function createSummaryTable() {
 
             # Print the modified original row followed by other columns
             print $0 "|" source "|" protein_accession "|" source2 "|" nucl_accession "|" genomic_region "|" organism
-        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers >temp_joint_RVDB_blast_table_headers_parsed
+        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
     }
 
     # Function to join two tables based on the second column
@@ -362,7 +361,7 @@ function createSummaryTable() {
     # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
     # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
     # But its fine this way too
-    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
+    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt
     join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
 
     # Check if the readcounts file exists and is not empty
@@ -496,14 +495,16 @@ wd="/project/$root_project/$project"
 scripts="/project/$root_project/$project/scripts/"
 abundance="/scratch/$root_project/$project/abundance/final_abundance"
 taxonomy="/project/VELAB/jcom_pipeline_taxonomy"
-pathtoRscript="/project/$root_project/anaconda3/envs/r_env/lib/R/bin/"
 
 condaSetUp && checkStatus
+
+# assign the path based on the location of the conda env
+pathtoRscript="$CONDA_BASE/envs/r_env/lib/R/bin"
 
 # install the required R packages. This is horrible and will often fail for no real reason. I will have to make an image for this
 # The current fix is to load the r_env using conda r_env in an interactive session and manually installing these using the
 # check_and_install_R_packages function as below.
-check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" && checkStatus
+check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" "tidyr" "readr" && checkStatus
 
 createSummaryTable && checkStatus
 
