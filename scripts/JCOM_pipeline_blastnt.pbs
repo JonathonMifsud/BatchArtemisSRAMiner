@@ -61,13 +61,13 @@ function concatenateBlastContigs {
 }
 
 function Blastn {
-    blastn -query "$inpath"/"$file_of_accessions_name"_blastcontigs_forNT.fasta -db "$db" -out "$outpath"/"$file_of_accessions_name"_nt_blastn_results.txt -max_target_seqs 10 -num_threads 22 -mt_mode 1 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
+    blastn -query "$inpath"/"$file_of_accessions_name"_blastcontigs_forNT.fasta -db "$db" -out "$outpath"/"$file_of_accessions_name"_nt_blastn_results.txt -max_target_seqs 10 -num_threads 22 -evalue 1E-10 -subject_besthit -outfmt '6 qseqid qlen sacc salltitles staxids pident length evalue'
 }
 
 #tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
     grep -i ".*" "$outpath"/"$file_of_accessions_name"_nt_blastn_results.txt | cut -f1 | uniq >"$outpath"/"$file_of_accessions_name""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
-    grep -A1 -I -Ff "$outpath"/"$file_of_accessions_name""_temp_contig_names.txt" "$inpath"/"$file_of_accessions_name".contigs.fa >"$outpath"/"$file_of_accessions_name"_nt_blastcontigs.fasta
+    grep -A1 -I -Ff "$outpath"/"$file_of_accessions_name""_temp_contig_names.txt" "$inpath"/"$file_of_accessions_name"_blastcontigs_forNT.fasta >"$outpath"/"$file_of_accessions_name"_nt_blastcontigs.fasta
     sed -i 's/--//' "$outpath"/"$file_of_accessions_name"_nt_blastcontigs.fasta                            # remove -- from the contigs
     sed -i '/^[[:space:]]*$/d' "$outpath"/"$file_of_accessions_name"_nt_blastcontigs.fasta                 # remove the white space
     sed --posix -i "/^\>/ s/$/"_$file_of_accessions_name"/" "$outpath"/"$file_of_accessions_name"_nt_blastcontigs.fasta # annotate the contigs
@@ -75,8 +75,8 @@ function blastToFasta {
     rm "$inpath"/"$file_of_accessions_name"_blastcontigs_forNT.fasta 
 }
 
+# Setting variables - you shouldn't really need to change these other than resource allocations
 file_of_accessions_name=$(basename -- "$file_of_accessions")
-
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output

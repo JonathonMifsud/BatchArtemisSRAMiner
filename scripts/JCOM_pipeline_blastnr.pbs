@@ -69,17 +69,17 @@ function BlastxNR {
 
 #tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$file_of_accessions_name"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$file_of_accessions_name""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
-	grep -A1 -I -Ff "$outpath"/"$file_of_accessions_name""_temp_contig_names.txt" "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta > "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta
+    grep -i ".*" "$outpath"/"$file_of_accessions_name"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+	grep -A1 -I -Ff "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt" "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta > "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta
     sed -i 's/--//' "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # remove -- from the contigs
     sed -i '/^[[:space:]]*$/d' "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # remove the white space
     sed --posix -i "/^\>/ s/$/"_$file_of_accessions_name"/" "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # annotate the contigs
-    rm "$outpath"/"$file_of_accessions_name""_temp_contig_names.txt"
+    rm "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt"
     rm "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta # remove the blastcontigs file
 }
 
+# Setting variables - you shouldn't really need to change these
 file_of_accessions_name=$(basename -- "$file_of_accessions")
-
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
