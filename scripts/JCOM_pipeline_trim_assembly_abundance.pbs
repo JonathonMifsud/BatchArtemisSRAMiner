@@ -34,12 +34,16 @@ module load perl/5.24.0
 readTrimmomatic() {
     # In case the TruSeq3 adapters are not in path we will download them to the working directory
     # Check the file as sometimes it doesn't download properly and results in unknown trimmer error
+    # We use phread33 because there is a common error if you don't specify this
+    # and as far as I am aware all illumina (and all modern metagenomic?) reads are phread33
+
     if [[ "$layout" == "single" ]]; then
         cp /project/"$root_project"/"$project"/adapters/TruSeq3-SE.fa ./
         echo -e "MEGAHIT_SCRIPT: READ TRIMMOMATIC SINGLE - READ QC"
         # Quality control for single-end reads
         trimmomatic SE \
             -threads "$CPU" \
+            -phred33 \
             "$inpath"/"$library_id".fastq.gz \
             /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed.fastq.gz \
             ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25
@@ -48,6 +52,7 @@ readTrimmomatic() {
         cp /project/"$root_project"/"$project"/adapters/joint_TruSeq3_Nextera-PE.fa ./
         echo -e "MEGAHIT_SCRIPT: READ TRIMMOMATIC PAIRED - READ QC"
         trimmomatic PE \
+            -phred33 \
             -threads "$CPU" \
             "$inpath"/"$library_id"_1.fastq.gz "$inpath"/"$library_id"_2.fastq.gz \
             /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R1.fastq.gz /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R1.fastq.gz /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_trimmed_R2.fastq.gz /scratch/"$root_project"/"$project"/trimmed_reads/"$library_id"_removed_R2.fastq.gz \
@@ -109,7 +114,7 @@ function callRSEM() {
     #rm -r /project/"$root_project"/"$project"/abundance/"$library_id"_abundance
 }
 
-# variables change these to whatever you like!
+# Setting variables - you shouldn't really need to change these other than resource allocations
 wd=/project/"$root_project"/"$project"/contigs
 inpath=/scratch/"$root_project"/"$project"/raw_reads                       # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/contigs                        # location of megahit output
