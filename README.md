@@ -23,6 +23,7 @@ NOTE: This pipeline relies on several databases, modules and taxonomy files that
     - [Storage](#storage)
   - [Troubleshooting](#troubleshooting)
   - [Installing Anaconda](#installing-anaconda)
+  - [Acknowledgments](#acknowledgments)
   - [How to cite this repo?](#how-to-cite-this-repo)
 
 --------------------
@@ -177,5 +178,11 @@ To create the environments run the following:
 
 --------------------
 
+## Acknowledgments
+I'd like to acknowledge past and present members of the Holmes Lab for their contributions to the development of this pipeline. Extra special thanks goes to Susana Ortiz-Baez, Vince Costa, Erin Harvey, Lauren Lim, Mary Petrone and Sabrina Sadiq for suggestions and/or bug reports!
+
+--------------------
+
 ## How to cite this repo?
-If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, C.O. (2023) BatchArtemisSRAMiner v1.X.X. doi:10.5281/zenodo.8417950 Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
+If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, J.C.O. (2023) BatchArtemisSRAMiner v1.X.X. doi:10.5281/zenodo.8417950 Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
+$$
