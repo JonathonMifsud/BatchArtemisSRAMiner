@@ -111,6 +111,9 @@ fi
 # This relys on the naming convention of the RVDB database build script /scratch/VELAB/Databases/update_db_3.pbs
 rvdb_accession2taxid=$(echo "$rvdb_database" | sed 's/.dmnd/.accession2taxid.txt/g')
 
+# Define 
+wd="/project/$root_project/$project/"
+abundance="/scratch/$root_project/$project/abundance/final_abundance"
 # Check if the rvdb_accession2taxid file exists
 if [ ! -f "$rvdb_accession2taxid" ]; then
     echo "ERROR: The RVDB accession2taxid file does not exist: $rvdb_accession2taxid for the RVDB database provided: $rvdb_database"
@@ -118,10 +121,10 @@ if [ ! -f "$rvdb_accession2taxid" ]; then
 fi
 
 input_check() {
-    echo ""
-    echo "-f passes an accession file which the summary_table script will parse each ID and collect the abundance, readcount, and blast (RdRp/RVDB) results for each ID."
-    echo ""
-    echo "The summary_table script also requires the combined blast output file (i.e. _blastnr and _blastnt). It assumes this is named after the file_of_accessions provided."
+    #echo ""
+    #echo "-f passes an accession file which the summary_table script will parse each ID and collect the abundance, readcount, and blast (RdRp/RVDB) results for each ID."
+    #echo ""
+    #echo "The summary_table script also requires the combined blast output file (i.e. _blastnr and _blastnt). It assumes this is named after the file_of_accessions provided."
 
     echo ""
     echo "Checking if the required files exist and are non-empty."
@@ -150,10 +153,12 @@ input_check() {
     # Check if -n and -t flags are not provided
     if [ -z "$nr_results" ] && [ -z "$nt_results" ]; then
         # Define the file paths
-        nr_results="/project/$root_project/$project/blast_results/${file_of_accessions_name}_nr_blastx_results.txt"
-        nt_results="/project/$root_project/$project/blast_results/${file_of_accessions_name}_nt_blastn_results.txt"
-        nr_blastcontigs="/project/$root_project/$project/blast_results/${file_of_accessions_name}_nr_blastcontigs.fasta"
-        nt_blastcontigs="/project/$root_project/$project/blast_results/${file_of_accessions_name}_nt_blastcontigs.fasta"
+        file_of_accessions_without_path=$(basename "$file_of_accessions")
+        file_of_accessions_name=$(echo "${file_of_accessions_without_path%.*}")
+        nr_results="$wd/blast_results/${file_of_accessions_name}_nr_blastx_results.txt"
+        nt_results="$wd/blast_results/${file_of_accessions_name}_nt_blastn_results.txt"
+        nr_blastcontigs="$wd/blast_results/${file_of_accessions_name}_nr_blastcontigs.fasta"
+        nt_blastcontigs="$wd/blast_results/${file_of_accessions_name}_nt_blastcontigs.fasta"
         # Check if the specified files are non-empty
         empty_files=()
 
@@ -181,8 +186,8 @@ input_check() {
         else
             # Prompt the user for confirmation
             echo "All of the following files are present and non-empty:"
-            echo "nr_blastx_results: $nr_blastx_results"
-            echo "nt_blastn_results: $nt_blastn_results"
+            echo "nr_blastx_results: $nr_results"
+            echo "nt_blastn_results: $nt_results"
             echo "nr_blastcontigs: $nr_blastcontigs"
             echo "nt_blastcontigs: $nt_blastcontigs"
             read -p "Is this the nt and nr results you would like to run the summary table on? (Y/N): " -r
@@ -271,13 +276,18 @@ input_check() {
     echo "Number of Abundance files loaded: ${#abundance_files[@]}" # Count the number of abundance files
     echo "Number of RdRp Blast files loaded: ${#rdrp_blast_files[@]}" # Count the number of RdRp blast files
     echo "Number of RVDB Blast files loaded: ${#rvdb_blast_files[@]}" # Count the number of RVDB blast files
+
+    [ -s "$wd/read_count/${project}_accessions_reads" ] || {
+        echo "Read count file not found or empty, please run ${project}_readcount.sh Exiting."
+        exit 1
+    }
 }
 
 input_check
 
 qsub -o "/project/$root_project/$project/logs/summary_table_creation_$project_$(date '+%Y%m%d')_stout.txt" \
     -e "/project/$root_project/$project/logs/summary_table_creation_$project_$(date '+%Y%m%d')_stderr.txt" \
-    -v "project=$project,root_project=$root_project,file_of_accessions=$file_of_accessions,rvdb_accession2taxid=$rvdb_accession2taxid,nr_results=$nr_results,nt_results=$nt_results,nr_blastcontigs$nr_blastcontigs,nt_blastcontigs=$nt_blastcontigs" \
+    -v "project=$project,root_project=$root_project,file_of_accessions=$file_of_accessions,rvdb_accession2taxid=$rvdb_accession2taxid,nr_results=$nr_results,nt_results=$nt_results,nr_blastcontigs=$nr_blastcontigs,nt_blastcontigs=$nt_blastcontigs" \
     -q "$queue" \
     -l "walltime=3:00:00" \
     -P "$root_project" \
