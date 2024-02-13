@@ -35,13 +35,13 @@ function blastToFasta {
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
+# Setting variables - you shouldn't really need to change these other than resource allocations
 # read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
 readarray -t myarray <"$file_of_accessions"
 export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
 
-# variables change these to whatever you like!
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
