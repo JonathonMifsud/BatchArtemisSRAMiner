@@ -14,7 +14,25 @@ queue="defaultQ"
 project="JCOM_pipeline_virome"
 root_project="jcomvirome"
 
-while getopts "i:q:m:r:p:" 'OPTKEY'; do
+show_help() {
+    echo ""
+    echo "Usage: $0 [-i alignment] [-m model] [-h]"
+    echo "  -i alignment: sequence alignment to build tree from, provide the full path. (Required)"
+    echo "  -m model: substitution model to use, leave blank for ModelFinder. (Optional)"
+    echo "  -h: Display this help message."
+    echo ""
+    echo "  Example:"
+    echo "  With ModelFinder:"
+    echo "  $0 -i /project/$root_project/$project/virus_alignment.fasta"
+    echo "  With a selected model:"
+    echo "  $0 -i /project/$root_project/$project/virus_alignment.fasta -m "LG+F+I+G4""
+    echo ""
+    echo " Check the Github page for more information:"
+    echo " https://github.com/JonathonMifsud/BatchArtemisSRAMiner "
+    exit 1
+}
+
+while getopts "i:q:m:r:p:h" 'OPTKEY'; do
     case "$OPTKEY" in
     'i')
         #
@@ -36,36 +54,40 @@ while getopts "i:q:m:r:p:" 'OPTKEY'; do
         #
         project="$OPTARG"
         ;;
+    'h')
+        #
+        show_help
+        ;;
     '?')
         echo "INVALID OPTION -- ${OPTARG}" >&2
-        exit 1
+        show_help
         ;;
     ':')
         echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
-        exit 1
+        show_help
         ;;
     *)
         # Handle invalid flags here
         echo "Invalid option: -$OPTARG" >&2
-        exit 1
+        show_help
         ;;  
     esac
 done
 shift $((OPTIND - 1))
 
 if [ "$alignment" = "" ]; then
-    echo "No alignment provided to align use -i myseqs.fasta"
-    exit 1
+    echo "ERROR: No alignment provided to align use -i myseqs.fasta"
+    show_help
 fi
 
 if [ "$project" = "" ]; then
-    echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
-    exit 1
+    echo "ERROR: No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    show_help
 fi
 
 if [ "$root_project" = "" ]; then
-    echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
-    exit 1
+    echo "ERROR: No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    show_help
 fi
 
 qsub -o "/project/$root_project/$project/logs/iqtree_$(date '+%Y%m%d')_stout.txt" \
@@ -74,4 +96,4 @@ qsub -o "/project/$root_project/$project/logs/iqtree_$(date '+%Y%m%d')_stout.txt
     -q "$queue" \
     -l "walltime=48:00:00" \
     -P "$root_project" \
-    /project/$root_project/$project/scripts/JCOM_pipeline_iqtree.pbs
+    /project/"$root_project"/"$project"/scripts/JCOM_pipeline_iqtree.pbs

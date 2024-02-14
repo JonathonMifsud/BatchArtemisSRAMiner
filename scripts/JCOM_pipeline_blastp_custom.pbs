@@ -34,8 +34,8 @@ function blastToFasta {
     rm "$outpath"/"$library_id""_temp_contig_names.txt"
 }
 
+# Setting variables - you shouldn't really need to change these other than resource allocations
 library_id="$(basename -- $input)"
-
 cd "$wd" || exit
 outpath="$wd"
 CPU=12

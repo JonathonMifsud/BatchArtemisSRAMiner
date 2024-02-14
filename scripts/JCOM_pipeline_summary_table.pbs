@@ -181,23 +181,24 @@ function createSummaryTable() {
     conda activate r_env
 
     # Check if the files exist in the summary_table_creation folder, otherwise copy from the parent blast_results folder
-    if [ ! -f "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt ] || [ ! -f "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt ]; then
-        if [ -f "$wd"/blast_results/combined_nr_blastx_results.txt ] && [ -f "$wd"/blast_results/combined_nt_blastn_results.txt ]; then
-            echo "Found combined_nr_blastx_results.txt aqstat nd combined_nt_blastn_results.txt in blast_results folder."
-            # Copy the files to the summary_table_creation folder
-            cp "$wd"/blast_results/combined_nr_blastx_results.txt "$wd"/blast_results/summary_table_creation/
-            cp "$wd"/blast_results/combined_nt_blastn_results.txt "$wd"/blast_results/summary_table_creation/
-            echo "Copied the files to summary_table_creation folder."
-        else
-            echo "Combined blast result files not found in summary_table_creation or blast_results folder."
-            exit 1
-        fi
+    if [ -s "$nr_results" ] && [ -s "$nt_results" ]; then
+        nr_results_file="$(basename -- $nr_results)"
+        nt_results_file="$(basename -- $nt_results)"
+        echo "Found combined_nr_blastx_results.txt and combined_nt_blastn_results.txt in blast_results folder."
+        # Copy the files to the summary_table_creation folder
+        cp "$nr_results" "$wd"/blast_results/summary_table_creation/"$nr_results_file"
+        cp "$nt_results" "$wd"/blast_results/summary_table_creation/"$nt_results_file"
+        echo "Copied the files to summary_table_creation folder."
     else
-        echo "Found combined_nr_blastx_results.txt and combined_nt_blastn_results.txt in summary_table_creation folder."
+        echo "Combined blast result files not found in summary_table_creation or blast_results folder."
+        exit 1
     fi
 
     if [[ -n "$file_of_accessions" && -f "$file_of_accessions" ]]; then
         # Function to filter the files based on accessions
+        # This is somewhat redudant now that we require -f for summary table
+        # However it would be useful in the case that someone runs the full pipeline on say 500 samples and then wants to run 
+        # the summary table only on a subset of these (in this case the blastnr and blastnt files would still contain all 500 so filtering will fix this)
         function filter_files() {
             local input_file="$1"  # Path to the input file
             local subset_file="$2" # Path to the subset file
@@ -237,7 +238,6 @@ function createSummaryTable() {
             while IFS= read -r accession; do
                 echo "Accession: $accession"
                 filtered_data["$accession"]=$(awk -v accession="$accession" '$0 ~ accession' "$input_file")
-                echo "Filtered data for accession '$accession': ${filtered_data["$accession"]}"
             done <"$subset_file"
 
             # Write filtered data to separate files
@@ -266,31 +266,31 @@ function createSummaryTable() {
         }
 
         # Backup the original combined_nr_blastx_results.txt file
-        if [[ -f "$wd/blast_results/summary_table_creation/combined_nr_blastx_results.txt" ]]; then
-            cp "$wd/blast_results/summary_table_creation/combined_nr_blastx_results.txt" "$wd/blast_results/summary_table_creation/unfiltered_combined_nr_blastx_results.txt"
+        if [[ -f "$wd"/blast_results/summary_table_creation/"$nr_results_file" ]]; then
+            cp "$wd"/blast_results/summary_table_creation/"$nr_results_file" "$wd"/blast_results/summary_table_creation/unfiltered_"$nr_results_file"
         fi
 
         # Filter the combined_nr_blastx_results.txt file
-        if filter_files "$wd/blast_results/summary_table_creation/combined_nr_blastx_results.txt" "$file_of_accessions"; then
-            echo "Filtering of combined_nr_blastx_results.txt completed successfully."
+        if filter_files "$wd"/blast_results/summary_table_creation/"$nr_results_file" "$file_of_accessions"; then
+            echo "Filtering of $nr_results_file completed successfully."
             # Copy the subset file to combined_nr_blastx_results.txt
-            cp "$wd/blast_results/summary_table_creation/filtered_combined_nr_blastx_results.txt" "$wd/blast_results/summary_table_creation/combined_nr_blastx_results.txt"
+            cp "$wd"/blast_results/summary_table_creation/filtered_"$nr_results_file" "$wd"/blast_results/summary_table_creation/"$nr_results_file"
         else
-            echo "Error occurred while filtering combined_nr_blastx_results.txt."
+            echo "Error occurred while filtering $nr_results_file"
         fi
 
-        # Backup the original combined_nt_blastn_results.txt file
-        if [[ -f "$wd/blast_results/summary_table_creation/combined_nt_blastn_results.txt" ]]; then
-            cp "$wd/blast_results/summary_table_creation/combined_nt_blastn_results.txt" "$wd/blast_results/summary_table_creation/unfiltered_combined_nt_blastn_results.txt"
+        # Backup the original combined_nt_blastx_results.txt file
+        if [[ -f "$wd"/blast_results/summary_table_creation/"$nt_results_file" ]]; then
+            cp "$wd"/blast_results/summary_table_creation/"$nt_results_file" "$wd"/blast_results/summary_table_creation/unfiltered_"$nt_results_file"
         fi
 
-        # Filter the combined_nt_blastn_results.txt file
-        if filter_files "$wd/blast_results/summary_table_creation/combined_nt_blastn_results.txt" "$file_of_accessions"; then
-            echo "Filtering of combined_nt_blastn_results.txt completed successfully."
-            # Copy the subset file to combined_nt_blastn_results.txt
-            cp "$wd/blast_results/summary_table_creation/filtered_combined_nt_blastn_results.txt" "$wd/blast_results/summary_table_creation/combined_nt_blastn_results.txt"
+        # Filter the combined_nt_blastx_results.txt file
+        if filter_files "$wd"/blast_results/summary_table_creation/"$nt_results_file" "$file_of_accessions"; then
+            echo "Filtering of $nt_results_file completed successfully."
+            # Copy the subset file to combined_nt_blastx_results.txt
+            cp "$wd"/blast_results/summary_table_creation/filtered_"$nt_results_file" "$wd"/blast_results/summary_table_creation/"$nt_results_file"
         else
-            echo "Error occurred while filtering combined_nt_blastn_results.txt."
+            echo "Error occurred while filtering $nt_results_file"
         fi
     else
         echo "File of accessions not provided or does not exist. Skipping filtering."
@@ -311,11 +311,11 @@ function createSummaryTable() {
         # Step 3: Process and format the RVDB blast results
         awk -F '|' '{
 
-            source=$2        # Store the 2nd column in the 'source' variable
-            protein_accession=$3  # Store the 3rd column in the 'protein_accession' variable
-            source2=$4      # Store the 4th column in the 'source2' variable
-            nucl_accession=$5   # Store the 5th column in the 'nucl_accession' variable
-            genomic_region=$6   # Store the 6th column in the 'genomic_region' variable
+            source=$2        # Store the 2nd column in the source variable
+            protein_accession=$3  # Store the 3rd column in the protein_accession variable
+            source2=$4      # Store the 4th column in the source2 variable
+            nucl_accession=$5   # Store the 5th column in the nucl_accession variable
+            genomic_region=$6   # Store the 6th column in the genomic_region variable
 
             # Extract organism from genomic_region using gensub
             organism=gensub(/.*\[|\].*/, "", "g", genomic_region)
@@ -326,13 +326,14 @@ function createSummaryTable() {
             # Remove leading and trailing whitespace from genomic_region
             gsub(/^[ \t]+|[ \t]+$/, "", genomic_region)
 
-            # Replace 'old_string' with 'new_string' in the original row ($0)
+            # Replace old_string with new_string in the original row ($0)
             gsub("\\|", "%", $0)
 
             # Print the modified original row followed by other columns
             print $0 "|" source "|" protein_accession "|" source2 "|" nucl_accession "|" genomic_region "|" organism
-        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers >temp_joint_RVDB_blast_table_headers_parsed
+        }' "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
     }
+
     # Function to join two tables based on the second column
     join_tables() {
         # Check if both input files exist
@@ -360,7 +361,7 @@ function createSummaryTable() {
     # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
     # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
     # But its fine this way too
-    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed
+    process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt
     join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
 
     # Check if the readcounts file exists and is not empty
@@ -381,8 +382,8 @@ function createSummaryTable() {
     conda deactivate
     conda activate r_env
     "$pathtoRscript"/Rscript "$scripts"/"$project"_create_blast_joint_table.R \
-        --nr "$wd"/blast_results/summary_table_creation/combined_nr_blastx_results.txt \
-        --nt "$wd"/blast_results/summary_table_creation/combined_nt_blastn_results.txt \
+        --nr "$wd"/blast_results/summary_table_creation/"$nr_results_file" \
+        --nt "$wd"/blast_results/summary_table_creation/"$nt_results_file" \
         --rdrp "$wd"/blast_results/summary_table_creation/combined_rdrp_blastx_results.txt \
         --rvdb "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt \
         --abundance "$wd"/blast_results/summary_table_creation/combined_abundance_table.txt \
@@ -494,14 +495,16 @@ wd="/project/$root_project/$project"
 scripts="/project/$root_project/$project/scripts/"
 abundance="/scratch/$root_project/$project/abundance/final_abundance"
 taxonomy="/project/VELAB/jcom_pipeline_taxonomy"
-pathtoRscript="/project/$root_project/anaconda3/envs/r_env/lib/R/bin/"
 
 condaSetUp && checkStatus
+
+# assign the path based on the location of the conda env
+pathtoRscript="$CONDA_BASE/envs/r_env/lib/R/bin"
 
 # install the required R packages. This is horrible and will often fail for no real reason. I will have to make an image for this
 # The current fix is to load the r_env using conda r_env in an interactive session and manually installing these using the
 # check_and_install_R_packages function as below.
-check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" && checkStatus
+check_and_install_R_packages "vroom" "optparse" "dplyr" "purrr" "stringr" "tidyr" "readr" && checkStatus
 
 createSummaryTable && checkStatus
 

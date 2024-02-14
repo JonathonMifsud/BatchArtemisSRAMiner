@@ -38,7 +38,7 @@ export library_run=${myarray["$PBS_ARRAY_INDEX"]}
 library_run_without_path="$(basename -- $library_run)"
 library_id=$(echo $library_run_without_path | sed 's/\.fastq.gz//g' | sed 's/_*//g')
 
-# Variables to define working paths and parameters
+# Setting variables - you shouldn't really need to change these other than resource allocations
 wd=/project/"$root_project"/"$project"/ccmetagen
 inpath=/scratch/"$root_project"/"$project"/raw_reads
 outpath=/project/"$root_project"/"$project"/ccmetagen

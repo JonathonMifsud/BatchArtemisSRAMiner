@@ -18,28 +18,68 @@
 module load blast+
 module load diamond/2.1.6
 
+
+# concatenate all of the RdRp and RVDB blastcontigs into a file to blastx against the nr database
+function concatenateBlastContigs {
+    if [[ -z "$file_of_accessions" ]]; then
+        rdrp_blastcontigs_file=("$wd"/*_rdrp_blastcontigs.fasta)
+        rvdb_blastcontigs_file=("$wd"/*_RVDB_blastcontigs.fasta)
+    else
+        accession_ids=$(cat "$file_of_accessions")
+        rdrp_blastcontigs_file=()
+        rvdb_blastcontigs_file=()
+        missing_files=()
+
+        # Iterate over each accession ID and find corresponding files
+        for id in $accession_ids; do
+            rdrp_blastcontigs="$wd"/"${id}"_rdrp_blastcontigs.fasta
+            rvdb_blastcontigs="$wd"/"${id}"_RVDB_blastcontigs.fasta
+
+            # Check if the RdRp blastcontigs file exists
+            if [ -f "$rdrp_blastcontigs" ]; then
+                rdrp_blastcontigs_file+=("$rdrp_blastcontigs")
+            else
+                missing_files+=("RdRp blastcontigs file missing for accession ID: $id")
+            fi
+
+            # Check if the RVDB blastcontigs file exists
+            if [ -f "$rvdb_blastcontigs" ]; then
+                rvdb_blastcontigs_file+=("$rvdb_blastcontigs")
+            else
+                missing_files+=("RVDB blastcontigs file missing for accession ID: $id")
+            fi
+        done
+
+        # Print missing files if any
+        if [ ${#missing_files[@]} -gt 0 ]; then
+            echo "${missing_files[@]}"
+        fi
+
+        cat "${rdrp_blastcontigs_file[@]}" >"$wd"/"$file_of_accessions_name"_combined_rdrp_blastcontigs_forNR.fasta # Concatenate all RdRp blast contig files into one file
+        cat "${rvdb_blastcontigs_file[@]}" >"$wd"/"$file_of_accessions_name"_combined_RVDB_blastcontigs_forNR.fasta # Concatenate all RVDB blast contig files into one file
+        cat "$wd"/"$file_of_accessions_name"_combined_rdrp_blastcontigs_forNR.fasta "$wd"/"$file_of_accessions_name"_combined_RVDB_blastcontigs_forNR.fasta >"$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta 
+        rm "$wd"/"$file_of_accessions_name"_combined_rdrp_blastcontigs_forNR.fasta "$wd"/"$file_of_accessions_name"_combined_RVDB_blastcontigs_forNR.fasta
+    fi
+}
+
 # blastx
 function BlastxNR {
-    diamond blastx -q "$inpath"/"$library_id".contigs.fa -d "$db" -o "$outpath"/"$library_id"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
+    diamond blastx -q "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta -d "$db" -o "$outpath"/"$file_of_accessions_name"_nr_blastx_results.txt "$diamond_para" -f 6 qseqid qlen sseqid stitle staxids pident length evalue
 }
 
 #tool to extract contigs from assembly Blast to fasta
 function blastToFasta {
-    grep -i ".*" "$outpath"/"$library_id"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$library_id""_temp_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
-	grep -A1 -I -Ff "$outpath"/"$library_id""_temp_contig_names.txt" "$inpath"/"$library_id".contigs.fa > "$outpath"/"$library_id"_nr_blastcontigs.fasta
-    sed -i 's/--//' "$outpath"/"$library_id"_nr_blastcontigs.fasta # remove -- from the contigs
-    sed -i '/^[[:space:]]*$/d' "$outpath"/"$library_id"_nr_blastcontigs.fasta # remove the white space
-    sed --posix -i "/^\>/ s/$/"_$library_id"/" "$outpath"/"$library_id"_nr_blastcontigs.fasta # annotate the contigs
-    rm "$outpath"/"$library_id""_temp_contig_names.txt"
+    grep -i ".*" "$outpath"/"$file_of_accessions_name"_nr_blastx_results.txt | cut -f1 | uniq > "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt" #by defult this will grab the contig name from every blast result line as I commonly use a custom protein database containing only viruses
+	grep -A1 -I -Ff "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt" "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta > "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta
+    sed -i 's/--//' "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # remove -- from the contigs
+    sed -i '/^[[:space:]]*$/d' "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # remove the white space
+    sed --posix -i "/^\>/ s/$/"_$file_of_accessions_name"/" "$outpath"/"$file_of_accessions_name"_nr_blastcontigs.fasta # annotate the contigs
+    rm "$outpath"/"$file_of_accessions_name""_temp_nr_contig_names.txt"
+    rm "$inpath"/"$file_of_accessions_name"_blastcontigs_forNR.fasta # remove the blastcontigs file
 }
 
-# read in list of file names or accessions for example could be several fastq.gz files (paired or single) or just the accession id's
-readarray -t myarray < "$file_of_accessions"
-export library_run=${myarray["$PBS_ARRAY_INDEX"]}
-library_run_without_path="$(basename -- $library_run)"
-library_id=$(echo $library_run_without_path | sed 's/\.contigs.fa//g')
-
-# paths 
+# Setting variables - you shouldn't really need to change these
+file_of_accessions_name=$(basename -- "$file_of_accessions")
 wd=/project/"$root_project"/"$project"/blast_results
 inpath=/project/"$root_project"/"$project"/contigs/final_contigs   # location of reads and filenames
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
@@ -47,5 +87,6 @@ outpath=/project/"$root_project"/"$project"/blast_results        # location of m
 # cd working dir
 cd "$wd" || exit
 
+concatenateBlastContigs
 BlastxNR
 blastToFasta

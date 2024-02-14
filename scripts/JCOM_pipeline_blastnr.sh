@@ -17,7 +17,22 @@ queue="defaultQ"
 project="JCOM_pipeline_virome"
 root_project="jcomvirome"
 
-while getopts "p:f:q:r:d:" 'OPTKEY'; do
+show_help() {
+    echo ""
+    echo "Usage: $0 [-f file_of_accessions] [-d db] [-h]"
+    echo "  -f file_of_accessions: Full path to text file containing library ids one per line. (Required)"
+    echo "  -d db: DIAMOND Blast Database for blastx. (Required)"
+    echo "  -h: Display this help message."
+    echo ""
+    echo "  Example:"
+    echo "  $0 -f /project/$root_project/$project/accession_lists/mylibs.txt -d /scratch/VELAB/Databases/Blast/nr.^MONTH^-^YEAR^.dmnd"
+    echo ""
+    echo " Check the Github page for more information:"
+    echo " https://github.com/JonathonMifsud/BatchArtemisSRAMiner "
+    exit 1
+}
+
+while getopts "p:f:q:r:d:h" 'OPTKEY'; do
     case "$OPTKEY" in
     'p')
         #
@@ -39,50 +54,53 @@ while getopts "p:f:q:r:d:" 'OPTKEY'; do
         #
         root_project="$OPTARG"
         ;;
+    'h')
+        #
+        show_help
+        ;;
     '?')
         echo "INVALID OPTION -- ${OPTARG}" >&2
-        exit 1
+        show_help
         ;;
     ':')
         echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
-        exit 1
+        show_help
         ;;
     *)
         # Handle invalid flags here
         echo "Invalid option: -$OPTARG" >&2
-        exit 1
+        show_help
         ;;
     esac
 done
 shift $((OPTIND - 1))
 
 if [ "$project" = "" ]; then
-    echo "No project string entered. Use e.g, -p JCOM_pipeline_virome"
-    exit 1
+    echo "ERROR: No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    show_help
 fi
 
 if [ "$root_project" = "" ]; then
-    echo "No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
-    exit 1
+    echo "ERROR: No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    show_help
 fi
 
 if [ "$db" = "" ]; then
-    echo "No database specified. Use -d option to specify the database."
-    exit 1
+    echo "ERROR: No database specified. Use -d option to specify the database."
+    show_help
 fi
 
 if [ "$file_of_accessions" = "" ]; then
     # if no file of accessions is provided then run all files in the final_contigs directory
-    echo "No file containing files to run specified running all files in /project/$root_project/$project/contigs/final_contigs/"
-    ls -d /project/"$root_project"/"$project"/contigs/final_contigs/*.fa >/project/"$root_project"/"$project"/contigs/final_contigs/file_of_accessions_for_blastxNR
-    export file_of_accessions="/project/$root_project/$project/contigs/final_contigs/file_of_accessions_for_blastxNR"
+    echo "ERROR: No accession file containing files to run specified, please specify this with -f"
+    show_help
 else
     export file_of_accessions=$(ls -d "$file_of_accessions") # Get full path to file_of_accessions file when provided by the user
 fi
 
 # NR sometime goes over 48 hours we cant increase this in scavenger queue but if queue is set to defaultQ we can
 if [ "$queue" = "defaultQ" ]; then
-    job_time="walltime=48:00:00"
+    job_time="walltime=120:00:00"
     queue_project="$root_project" # what account to use in the pbs script this might be differnt from the root dir
     cpu="ncpus=24"
     mem="mem=220GB"
@@ -102,20 +120,9 @@ if [ "$queue" = "intensive" ]; then
     diamond_para="-e 1E-4 -c1 -b $diamond_mem -p $diamond_cpu --more-sensitive -k5 --tmpdir /scratch/$root_project/"
 fi
 
-#lets work out how many jobs we need from the length of input and format the J phrase for the pbs script
-jMax=$(wc -l <$file_of_accessions)
-jIndex=$(expr $jMax - 1)
-jPhrase="0-""$jIndex"
-
-# if input is of length 1 this will result in an error as J will equal 0-0. We will do a dirty fix and run it as 0-1 which will create an empty second job that will fail.
-if [ "$jPhrase" == "0-0" ]; then
-    export jPhrase="0-1"
-fi
-
 # Run the blastx jobs
-qsub -J "$jPhrase" \
-    -o "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
-    -e "/project/$root_project/$project/logs/blastnr_^array_index^_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
+qsub -o "/project/$root_project/$project/logs/blastnr_$project_$queue_$db_$(date '+%Y%m%d')_stout.txt" \
+    -e "/project/$root_project/$project/logs/blastnr_$project_$queue_$db_$(date '+%Y%m%d')_stderr.txt" \
     -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,diamond_para=$diamond_para,db=$db" \
     -q "$queue" \
     -l "$job_time" \
