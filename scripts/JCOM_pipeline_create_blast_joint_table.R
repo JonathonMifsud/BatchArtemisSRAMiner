@@ -95,7 +95,7 @@ blastCreateJoinTable <- function(nr_table,
     select(rdrp_contig, rdrp_accession, rdrp_desc, rdrp_ident, rdrp_evalue, viral_taxa, taxid, host_species, source) %>%
     rename(rdrp_viral_taxa = viral_taxa, rdrp_taxid = taxid, rdrp_host_species = host_species, rdrp_source = source)
 
-  table_rvdb <- rvdb_table %>%
+  table_rvdb <- table_rvdb %>%
     left_join(rvdb_taxonomy, by = c("rvdb_desc" = "join_column")) %>%
     select(rvdb_contig, protein_accession, organism, rvdb_ident, rvdb_evalue, genomic_region, taxid) %>%
     rename(rvdb_protein_accession = protein_accession, rvdb_organism = organism, rvdb_genomic_region = genomic_region, rvdb_taxid = taxid)
