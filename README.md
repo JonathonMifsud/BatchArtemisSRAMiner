@@ -155,6 +155,7 @@ Download the Anaconda installer script from the Anaconda distribution site. You 
 `wget https://repo.anaconda.com/archive/Anaconda3-4.3.0-Linux-x86_64.sh`
 `bash Anaconda3-4.3.0-Linux-x86_64.sh`
 
+You may get a certificate error, you can get around this using `--no-check-certificate` in the `wget` command.
 
 Press ENTER to continue and review the license agreement. Press `ENTER` again to move through the text. Once you've reviewed the license, type `yes` to agree to the terms.
 
