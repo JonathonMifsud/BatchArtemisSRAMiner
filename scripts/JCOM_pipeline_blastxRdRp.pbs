@@ -47,7 +47,7 @@ outpath=/project/"$root_project"/"$project"/blast_results        # location of m
 tempdir=/scratch/"$root_project"/
 CPU=6
 MEM=2
-db=/scratch/VELAB/Databases/RdRp_db/RdRp-scan/RdRp-scan_0.90.dmnd
+db=/scratch/VELAB/Databases/Blast/RdRp-scan/RdRp-scan_0.90.dmnd
 
 # cd working dir
 cd "$wd" || exit
