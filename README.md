@@ -177,6 +177,9 @@ To create the environments run the following:
 `conda env create -f /project/^your_root_project^/^your_project^/environments/project_pipeline.yml`
 `conda env create -f /project/^your_root_project^/^your_project^/environments/r_env.yml`
 
+If you run into an errpr saying CondaHTTPError... you can run `conda config --set ssl_verify no` and then try creating the environment again. 
+
+
 --------------------
 
 ## Acknowledgments
