@@ -5,7 +5,7 @@ A repo containing tools and shortcuts for virus discovery workflows for the Holm
 
 The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
 
-NOTE: This pipeline relies on several databases, modules and taxonomy files that are available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me an email.
+NOTE: This pipeline relies on several databases (NR, NT, RVDB and RdRp-Scan), modules and taxonomy files (NCBI taxdb, taxize, RVDB tax) that are made available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me an email.
 
 
 --------------------
