@@ -1,0 +1,34 @@
+#!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2024                                                      #
+#                                                                                                             #
+###############################################################################################################
+
+#PBS -N logan_download
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
+
+module load zstd
+module load aws-cli
+
+# Set the input path to where the contigs will be stored
+inpath="/project/$root_project/$project/logan_contigs/"
+
+# Check if the directory exists, if not create it
+if [ ! -d "$inpath" ]; then
+    mkdir -p "$inpath"
+fi
+
+# Navigate to the input directory
+cd "$inpath" || exit
+
+# Read in the list of accessions (or other files) from the provided file
+readarray -t myarray <"$file_of_accessions"
+
+# Get the specific library ID based on the PBS array index
+export library_id=${myarray["$PBS_ARRAY_INDEX"]}
+
+# Use a pipe to download and decompress the file in one step
+aws s3 cp s3://logan-pub/c/"$library_id"/"$library_id".contigs.fa.zst - --no-sign-request | zstdcat > "$library_id.contigs.fa"
