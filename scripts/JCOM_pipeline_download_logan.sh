@@ -7,9 +7,9 @@
 
 # Set the default values
 queue="defaultQ"
+max_jobs=1000
 project="JCOM_pipeline_virome"
 root_project="jcomvirome"
-max_jobs=1000
 
 show_help() {
     echo ""
@@ -59,12 +59,12 @@ done
 shift $((OPTIND - 1))
 
 if [ "$project" = "" ]; then
-    echo "ERROR: No project string entered. Use e.g, -p JCOM_pipeline_virome"
+    echo "ERROR: No project string entered. Use e.g, -p logan"
     show_help
 fi
 
 if [ "$root_project" = "" ]; then
-    echo "ERROR: No root project string entered. Use e.g., -r VELAB or -r jcomvirome"
+    echo "ERROR: No root project string entered. Use e.g., -r VELAB or -r camel_mining"
     show_help
 fi
 
@@ -94,36 +94,36 @@ total_ids=$(wc -l <"$file_of_accessions")
 
 if [ "$total_ids" -le "$max_jobs" ]; then
     # Case where total IDs are less than or equal to max_jobs
-    for ((i = 0; i < total_ids; i++)); do
-        walltime=$(get_walltime 1)  # 1 ID per job in this case
-
-        qsub -J "$i-$i" \
-            -o "/project/$root_project/$project/logs/sra_download_${i}_$project_$(date '+%Y%m%d')_stout.txt" \
-            -e "/project/$root_project/$project/logs/sra_download_${i}_$project_$(date '+%Y%m%d')_stderr.txt" \
-            -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project,index=$i" \
-            -q "$queue" \
-            -l "walltime=$walltime" \
-            -l select=1:ncpus=2:mem=10GB \
-            -P "$root_project" \
-            /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_sra.pbs
-    done
+    total_ids_phrase=$(( total_ids - 1 ))
+    qsub -J "0-$total_ids_phrase" \
+        -o "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
+        -e "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+        -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
+        -q "$queue" \
+        -l "walltime=2:00:00" \
+        -l select=1:ncpus=2:mem=10GB \
+        -P "$root_project" \
+        /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_logan.pbs
 else
     num_chunks=$(( (total_ids + max_jobs - 1) / max_jobs ))
 
-    split -l $max_jobs -d -a 4 --additional-suffix=.txt "$file_of_accessions" "${file_of_accessions}_chunk_"
-
+    split -l $max_jobs -d -a 4 "$file_of_accessions" "${file_of_accessions}_chunk_"
+    for file in "${file_of_accessions}_chunk_"*; do
+        mv "$file" "$file.txt"
+    done
+    
     for chunk in "${file_of_accessions}_chunk_"*.txt; do
         chunk_size=$(wc -l < "$chunk")
         jPhrase="0-$((chunk_size - 1))"
         walltime=$(get_walltime "$chunk_size")
 
         qsub -J "$jPhrase" \
-            -o "/project/$root_project/$project/logs/sra_download_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
-            -e "/project/$root_project/$project/logs/sra_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
+            -o "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
+            -e "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
             -v "project=$project,file_of_accessions=$chunk,root_project=$root_project" \
             -q "$queue" \
             -l "walltime=$walltime" \
             -P "$root_project" \
-            /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_sra.pbs
+            /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_logan.pbs
     done
 fi
