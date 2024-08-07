@@ -15,6 +15,7 @@ module load aws-cli
 
 # Set the input path to where the contigs will be stored
 inpath="/project/$root_project/$project/logan_contigs/"
+script_path="/project/$root_project/$project/scripts/convert_logan_contigs_to_megahit.py"
 
 # Check if the directory exists, if not create it
 if [ ! -d "$inpath" ]; then
@@ -42,7 +43,6 @@ fi
 # Get the specific library ID based on the PBS array index
 export library_id=${myarray["$PBS_ARRAY_INDEX"]}
 
-# Attempt to download and decompress the file with retries
 max_retries=3
 attempt_num=1
 while [ $attempt_num -le $max_retries ]; do
@@ -57,7 +57,7 @@ while [ $attempt_num -le $max_retries ]; do
         break
     else
         echo "$library_id: Download failed, retrying..."
-        sleep 5  # wait for 5 seconds before retrying
+        sleep 5 
     fi
 
     ((attempt_num++))
@@ -65,36 +65,16 @@ done
 
 if [ $attempt_num -gt $max_retries ]; then
     echo "$library_id: Failed to download after $max_retries attempts."
-    rm -f "$library_id.logan.contigs.fa"  # Use -f to avoid errors if the file doesn't exist
-    exit 1  # Exit the script since the download failed
+    rm -f "$library_id.logan.contigs.fa"  
+    exit 1  
 fi
 
-# If successful, we will start converting the contig file
+
 if [ -f "$library_id.logan.contigs.fa" ]; then
     echo "Starting conversion of $library_id.logan.contigs.fa..."
-    input_fasta="$library_id.logan.contigs.fa"
-    output_fasta="$library_id.contigs.fa"
 
-    while read -r line; do
-        if [[ $line == ">"* ]]; then
-            # This is a header line
-            accession=$(echo $line | cut -d' ' -f1 | cut -d'_' -f1)
-            count=$(echo $line | cut -d' ' -f1 | cut -d'_' -f2)
-            abundance=$(echo $line | grep -oP '(ka|km):f:\K[0-9\.]+')
+    # Call the external Python script
+    python3 "$script_path" "$library_id.logan.contigs.fa" "$library_id.contigs.fa"
 
-            # Prepare the new header
-            new_header=">c${count}_ka_f_${abundance}_len"
-
-            # Print the header into the output file (without the length for now)
-            echo -n "${new_header}" >> "$output_fasta"
-        else
-            # This is a sequence line
-            seq_len=${#line}
-            echo -n "${seq_len}_${accession}" >> "$output_fasta"
-            echo "" >> "$output_fasta"
-            echo "$line" >> "$output_fasta"
-        fi
-    done < "$input_fasta"
-
-    echo "Conversion complete! Modified FASTA saved to $output_fasta"
+    echo "Conversion complete! Modified FASTA saved to $library_id.contigs.fa"
 fi
