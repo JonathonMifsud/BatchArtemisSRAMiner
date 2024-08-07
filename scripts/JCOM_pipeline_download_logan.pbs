@@ -24,8 +24,20 @@ fi
 # Navigate to the input directory
 cd "$inpath" || exit
 
+# Ensure the $file_of_accessions variable is set and the file exists
+if [ -z "$file_of_accessions" ] || [ ! -f "$file_of_accessions" ]; then
+    echo "Error: file_of_accessions variable is not set or the file does not exist."
+    exit 1
+fi
+
 # Read in the list of accessions (or other files) from the provided file
 readarray -t myarray <"$file_of_accessions"
+
+# Ensure the PBS_ARRAY_INDEX is set and valid
+if [ -z "$PBS_ARRAY_INDEX" ] || [ "$PBS_ARRAY_INDEX" -ge "${#myarray[@]}" ]; then
+    echo "Error: PBS_ARRAY_INDEX is not set or is out of range."
+    exit 1
+fi
 
 # Get the specific library ID based on the PBS array index
 export library_id=${myarray["$PBS_ARRAY_INDEX"]}
@@ -37,7 +49,7 @@ while [ $attempt_num -le $max_retries ]; do
     echo "Attempt $attempt_num of $max_retries: Downloading $library_id..."
 
     # Use a pipe to download and decompress the file in one step
-    aws s3 cp s3://logan-pub/c/"$library_id"/"$library_id".contigs.fa.zst - --no-sign-request | zstdcat > "$library_id.contigs.fa"
+    aws s3 cp s3://logan-pub/c/"$library_id"/"$library_id".contigs.fa.zst - --no-sign-request | zstdcat > "$library_id.logan.contigs.fa"
     
     # Check if the download was successful
     if [ $? -eq 0 ]; then
@@ -53,4 +65,36 @@ done
 
 if [ $attempt_num -gt $max_retries ]; then
     echo "$library_id: Failed to download after $max_retries attempts."
+    rm -f "$library_id.logan.contigs.fa"  # Use -f to avoid errors if the file doesn't exist
+    exit 1  # Exit the script since the download failed
+fi
+
+# If successful, we will start converting the contig file
+if [ -f "$library_id.logan.contigs.fa" ]; then
+    echo "Starting conversion of $library_id.logan.contigs.fa..."
+    input_fasta="$library_id.logan.contigs.fa"
+    output_fasta="$library_id.contigs.fa"
+
+    while read -r line; do
+        if [[ $line == ">"* ]]; then
+            # This is a header line
+            accession=$(echo $line | cut -d' ' -f1 | cut -d'_' -f1)
+            count=$(echo $line | cut -d' ' -f1 | cut -d'_' -f2)
+            abundance=$(echo $line | grep -oP '(ka|km):f:\K[0-9\.]+')
+
+            # Prepare the new header
+            new_header=">c${count}_ka_f_${abundance}_len"
+
+            # Print the header into the output file (without the length for now)
+            echo -n "${new_header}" >> "$output_fasta"
+        else
+            # This is a sequence line
+            seq_len=${#line}
+            echo -n "${seq_len}_${accession}" >> "$output_fasta"
+            echo "" >> "$output_fasta"
+            echo "$line" >> "$output_fasta"
+        fi
+    done < "$input_fasta"
+
+    echo "Conversion complete! Modified FASTA saved to $output_fasta"
 fi

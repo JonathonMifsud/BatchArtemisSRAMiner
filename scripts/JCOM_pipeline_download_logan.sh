@@ -76,18 +76,18 @@ else
 fi
 
 # Function to determine walltime based on number of IDs
-get_walltime() {
-    local count=$1
-    if [ "$count" -lt 50 ]; then
-        echo "02:00:00"
-    elif [ "$count" -lt 200 ]; then
-        echo "04:00:00"
-    elif [ "$count" -lt 500 ]; then
-        echo "08:00:00"
-    else
-        echo "12:00:00"
-    fi
-}
+#get_walltime() {
+#    local count=$1
+#    if [ "$count" -lt 50 ]; then
+#        echo "02:00:00"
+#    elif [ "$count" -lt 200 ]; then
+#        echo "04:00:00"
+#    elif [ "$count" -lt 500 ]; then
+#        echo "08:00:00"
+#    else
+#        echo "12:00:00"
+#    fi
+#}
 
 # Calculate number of lines in the file
 total_ids=$(wc -l <"$file_of_accessions")
@@ -100,8 +100,8 @@ if [ "$total_ids" -le "$max_jobs" ]; then
         -e "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
         -v "project=$project,file_of_accessions=$file_of_accessions,root_project=$root_project" \
         -q "$queue" \
-        -l "walltime=2:00:00" \
-        -l select=1:ncpus=2:mem=10GB \
+        -l "walltime=00:15:00" \
+        -l select=1:ncpus=1:mem=6GB \
         -P "$root_project" \
         /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_logan.pbs
 else
@@ -115,14 +115,15 @@ else
     for chunk in "${file_of_accessions}_chunk_"*.txt; do
         chunk_size=$(wc -l < "$chunk")
         jPhrase="0-$((chunk_size - 1))"
-        walltime=$(get_walltime "$chunk_size")
+        #walltime=$(get_walltime "$chunk_size")
 
         qsub -J "$jPhrase" \
             -o "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stout.txt" \
             -e "/project/$root_project/$project/logs/logan_download_^array_index^_$project_$(date '+%Y%m%d')_stderr.txt" \
             -v "project=$project,file_of_accessions=$chunk,root_project=$root_project" \
             -q "$queue" \
-            -l "walltime=$walltime" \
+            -l "walltime=00:15:00" \
+            -l select=1:ncpus=1:mem=6GB \
             -P "$root_project" \
             /project/"$root_project"/"$project"/scripts/JCOM_pipeline_download_logan.pbs
     done
