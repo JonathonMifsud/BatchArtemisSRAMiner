@@ -1,0 +1,71 @@
+#!/bin/bash
+###############################################################################################################
+#                                            BatchArtemisSRAMiner                                             #
+#                                                JCO Mifsud                                                   #
+#                                                   2024                                                      #
+###############################################################################################################
+
+#PBS -N logan_clustering
+#PBS -M jmif9945@uni.sydney.edu.au
+#PBS -m abe
+
+module load cd-hit/4.8.1
+
+# Set the input path to where the contigs will be stored
+inpath="/project/$root_project/$project/logan_contigs/"
+
+# Check if the directory exists, if not create it
+if [ ! -d "$inpath" ]; then
+    mkdir -p "$inpath"
+fi
+
+# Navigate to the input directory
+cd "$inpath" || exit
+
+# Ensure the $file_of_accessions variable is set and the file exists
+if [ -z "$file_of_accessions" ] || [ ! -f "$file_of_accessions" ]; then
+    echo "Error: file_of_accessions variable is not set or the file does not exist."
+    exit 1
+fi
+
+# Read in the list of accessions from the provided file
+readarray -t myarray <"$file_of_accessions"
+
+# Set the output file name based on the accession file provided by the -f flag
+output_file="${file_of_accessions##*/}.contigs.fa"
+
+# Initialize an empty output file
+> "$output_file"
+
+# Loop through each accession and concatenate the associated contigs files
+for library_id in "${myarray[@]}"; do
+    contig_file="${inpath}${library_id}.contigs.fa"
+    if [ -f "$contig_file" ]; then
+        cat "$contig_file" >> "$output_file"
+    else
+        echo "Warning: Contigs file for $library_id not found."
+    fi
+done
+
+if [ ! -s "$output_file" ]; then
+    echo "Error: No contig files were concatenated. Exiting."
+    exit 1
+fi
+
+echo "Concatenation complete! Combined FASTA saved to $output_file"
+
+# Clustering contigs at 80% nucleotide identity using cd-hit-est
+concatenated_file="$output_file"  # This is the concatenated file from the previous step
+output_cluster="${concatenated_file%.contigs.fa}.clustered.contigs.fa"
+word_size=5
+identity=0.8
+
+echo "Starting clustering of $concatenated_file at 80% identity..."
+cd-hit-est -i "$concatenated_file" -o "$output_cluster" -c "$identity" -n "$word_size" -T 12 -M 120000
+
+if [ $? -eq 0 ]; then
+    echo "Clustering complete! Clustered FASTA saved to $output_cluster"
+else
+    echo "Error: Clustering failed."
+    exit 1
+fi
