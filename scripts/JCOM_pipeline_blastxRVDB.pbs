@@ -47,7 +47,7 @@ inpath=/project/"$root_project"/"$project"/contigs/final_contigs # location of r
 outpath=/project/"$root_project"/"$project"/blast_results        # location of megahit output
 tempdir=/scratch/"$root_project"/
 CPU=12
-MEM=2
+MEM=0.4
 
 # cd working dir
 cd "$wd" || exit
