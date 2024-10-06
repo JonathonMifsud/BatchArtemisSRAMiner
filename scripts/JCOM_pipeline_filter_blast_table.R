@@ -66,9 +66,9 @@ createVirusFolderDF <- function(blastoutput_table){
 }
 filterBlastTable <- function(blast_table, taxnomy_table_summarised){
 
+  # join blast table to taxa information
   blast_table_with_taxa <- blast_table %>%
-    # NR AND NT ARE NON_VIRUSES WHEN NA FOR SOME REASON
-    #where multiple taxid choose one as we arent concerned at such a minute taxa level (ie. we are only concerned about kingdom level)
+    #where multiple taxid choose one as we arent concerned at such a lower taxa level (ie. we are only concerned about kingdom level)
     mutate_at(c("rdrp_taxid", "nt_taxid", "nr_taxid", "rvdb_taxid"), funs(str_replace_all(., "\\;.*", ""))) %>%
     mutate(rdrp_taxid = as.numeric(rdrp_taxid),
           nt_taxid = as.numeric(nt_taxid),
@@ -80,7 +80,7 @@ filterBlastTable <- function(blast_table, taxnomy_table_summarised){
                                   group == "Viruses" ~ as.character(.$rdrp_viral_taxa),
                                            TRUE ~ paste0(as.character(.$rdrp_viral_taxa), ";", group))) %>%
     select(-group, -lineage, -kingdom) %>%
-    left_join(taxnomy_table_summarised, by = c("nt_taxid" = "taxid")) %>%
+    left_join(taxnomy_table_summarised, by = c("nt_taxid" = "taxid")) %>% 
     mutate(nt_kingdom = case_when((!is.na(nt_accession) & kingdom == "Viruses") ~ "Viruses",
                                   (!is.na(nt_accession) & kingdom != "Viruses")  ~ "Non-Viral")) %>%
     rename(nt_group = group) %>%
