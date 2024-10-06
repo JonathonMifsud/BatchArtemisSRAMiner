@@ -20,9 +20,7 @@ function condaSetUp() {
 }
 
 function check_and_install_R_packages() {
-    # There is major overkill in setting the temp dir here but I was having so much problems with it and something worked
-    # I think it would be possible to remove all of the unix tools sections and it would still work!
-    # Store the original TMPDIR
+    # There is overkill in setting the temp dir here but I was having problems with it
     original_TMPDIR="$TMPDIR"
     BUILD_DIR="$wd/r_tmp_build"
 
@@ -359,16 +357,13 @@ function createSummaryTable() {
     }
 
     # Here we take the RVDB header info and join this to taxid information and parse out the header into proper column structure (still delim by |)
-    # We probs don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
-    # But its fine this way too
+    # We don't actaully need to do all of this as I have set up taxonomy to work with RVDB so we should be able to grab the taxid from DIAMOND
     process_rvdb_taxa_information "$wd"/blast_results/summary_table_creation/combined_RVDB_blastx_results.txt
     join_tables "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_headers_parsed "$wd"/blast_results/summary_table_creation/temp_joint_RVDB_blast_table_taxids_filtered >"$wd"/blast_results/summary_table_creation/temp_joint_RVDB_taxa_blast_table.txt
 
     # Check if the readcounts file exists and is not empty
     # If the file does not exist or is empty, exit with an error
     # This is needed for abundance calculations
-    # Ideally I should parse this file here and check that each run is found in the read count file
-    # but I will do this later
     [ -s "$wd/read_count/${project}_accessions_reads" ] || {
         echo "Read count file not found or empty, please run _readcount.sh Exiting."
         exit 1
@@ -449,13 +444,14 @@ function extractContigsFromSummaryTable() {
     rm "$wd"/temp_contig_list
 }
 
-# the following are slightly broken and I haven't had a chance to fix so I currently don't split up the contig files by taxonomy
+# function is currently broken and not used
 function createTaxaFolderStructure() {
     summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
     cat "$wd"/blast_results/summary_table_creation/"$project"_complete_blast_summary_table_$(date '+%Y%m%d')_"$summary_table"_viruses_table_scaffold.csv | cut -f2 -d"," | sort | uniq | sed 's|\; .*||g' | sed 's|\;|\/|g' | sed 's/ //g' | sed -e "s|^|/project/$root_project/$project/blast_results/summary_table_creation/virus_fasta_files/|" >"$wd"/blast_results/summary_table_creation/dirs.txt
     mkdir -p $(<"$wd"/blast_results/summary_table_creation/dirs.txt)
 }
 
+# function is currently broken and not used
 function createTaxaVirusContigFiles() {
     # requires createTaxaFolderStructure to be run
     summary_table=$(echo $input_table | rev | cut -f2 -d"_" | rev)
