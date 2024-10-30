@@ -25,7 +25,7 @@ show_help() {
     echo "  -h: Display this help message."
     echo ""
     echo "  Example:"
-    echo "  $0 -i /project/$root_project/$project/contigs/final_contigs/mylib_translated_contigs.fa -d /scratch/VELAB/Databases/Blast/nr.^MONTH^-^YEAR^.dmnd"
+    echo "  $0 -i /project/$root_project/$project/contigs/final_contigs/mylib_contigs.fa -d /scratch/VELAB/Databases/Blast/nr.^MONTH^-^YEAR^.dmnd"
     echo ""
     echo " Check the Github page for more information:"
     echo " https://github.com/JonathonMifsud/BatchArtemisSRAMiner "
