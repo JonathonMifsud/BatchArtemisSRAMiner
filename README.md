@@ -1,6 +1,4 @@
 # BatchArtemisSRAMiner
-<a href="https://zenodo.org/badge/latestdoi/616299128"><img src="https://zenodo.org/badge/616299128.svg" alt="DOI"></a>
-
 A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a little janky and documentation is a work in progress!
 
 The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
@@ -182,14 +180,9 @@ To create the environments run the following:
 `conda env create -f /project/^your_root_project^/^your_project^/environments/r_env.yml`
 
 If you run into an errpr saying CondaHTTPError... you can run `conda config --set ssl_verify no` and then try creating the environment again. 
-
-
 --------------------
 
 ## Acknowledgments
 I'd like to acknowledge past and present members of the Holmes Lab for their contributions to the development of this pipeline. Extra special thanks goes to Susana Ortiz-Baez, Vince Costa, Erin Harvey, Lauren Lim, Mary Petrone and Sabrina Sadiq for suggestions and/or bug reports!
 
 --------------------
-
-## How to cite this repo?
-If this repo was somehow useful a citation would be greatly appeciated! Please cite as Mifsud, J.C.O. (2023) BatchArtemisSRAMiner v1.X.X. Zenodo. https://doi.org/10.5281/zenodo.10020164. Available at: https://github.com/JonathonMifsud/BatchArtemisSRAMiner/ .You can also get a reference file if you click on the doi badge at the top of the repo or visit this link https://zenodo.org/record/8417951
