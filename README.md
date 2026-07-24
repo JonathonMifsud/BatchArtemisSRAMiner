@@ -1,11 +1,7 @@
 # BatchArtemisSRAMiner
-A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a little janky and documentation is a work in progress!
+A repo containing tools and shortcuts for virus discovery workflows for the Holmes Lab on the USYD HPC Artemis with a particular focus on SRA mining but can be used with your own sequencing data. The code is a janky and documentation is incomplete. This pipeline relies on several databases (NR, NT, RVDB and RdRp-Scan), modules and taxonomy files (NCBI taxdb, taxize, RVDB tax) that are made available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. As such the pipeline is not simply portable outside of this server and I lack to time to do this, but if you are interested in the pipeline feel free to shoot me an email. In saying that there are many pipelines that follow the same premise and are much better developed / user friendly out there now so I would recommend having a look through these :) 
 
 The premise of the workflow is to quickly set up a folder structure and script set for a given project and to provide a repo that we can refer to in our methods section in manuscripts. 
-
-NOTE: This pipeline relies on several databases (NR, NT, RVDB and RdRp-Scan), modules and taxonomy files (NCBI taxdb, taxize, RVDB tax) that are made available on the USYD Artemis server which means that these scripts will not work out of the box outside of USYD Artemis server. At this stage I don't plan on making all of this portable outside of this server but if you are interested in the pipeline and are outside of USYD feel free to shoot me an email.
-
-
 --------------------
 ### Table of Contents
 - [BatchArtemisSRAMiner](#batchartemissraminer)
